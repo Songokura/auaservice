@@ -236,7 +236,7 @@ function buildMap(host) {
   const B = [[46.5, 48.5], [47, 49.9], [48.4, 49.8], [48.8, 50.6], [50.8, 51.7], [52.3, 51.7], [53.4, 51.5], [54.5, 51], [55.7, 50.6], [57.5, 51.1], [58.6, 51], [59.9, 50.8], [61.5, 51.2], [60.9, 52.2], [61, 53], [61.2, 53.6], [62, 54], [63.2, 54.2], [65.2, 54.4], [66.6, 54.7], [68.2, 55], [69, 55.4], [70.2, 55.2], [70.8, 55.3], [71.2, 54.3], [72, 54.3], [73.3, 54], [73.7, 54.1], [74.4, 53.6], [76.5, 54.2], [76.9, 54.4], [77.9, 53.3], [80.1, 50.8], [81.5, 50.8], [83.4, 51], [84.3, 50.3], [85.3, 49.6], [87.3, 49.2], [87, 48.6], [85.7, 48.4], [85.8, 47.1], [83, 47.2], [82.3, 45.5], [80.3, 45], [79.9, 44.9], [80.4, 43], [80.2, 42.3], [79.2, 42.8], [76, 42.9], [75, 42.9], [73.5, 43], [73.6, 42.4], [71.8, 42.8], [70.9, 42.3], [70.2, 41.6], [69.1, 41.4], [68.1, 40.8], [66.7, 41.2], [66.5, 42], [66, 42.4], [66.1, 43], [64.9, 43.7], [62, 43.5], [61.1, 44.3], [58.6, 45.6], [56, 45], [56, 41.3], [55.5, 41.3], [54.9, 42], [53, 42.1], [52.5, 41.8], [52.4, 42.8], [51.2, 43.2], [50.9, 44.2], [50.3, 44.3], [51.3, 45.2], [53, 45.3], [53.2, 46.3], [53, 46.9], [51.2, 47.1], [49.2, 46.4], [48.6, 46.6], [49, 46.8], [48.2, 47.7], [47.3, 47.7]];
   const X = lon => 30 + (lon - 46.5) * 21.3, Y = lat => 24 + (55.4 - lat) * 33;
   const d = 'M' + B.map(p => `${X(p[0]).toFixed(0)} ${Y(p[1]).toFixed(0)}`).join('L') + 'Z';
-  const C = [['geo.c1', 'Астана', 71.45, 51.17, 1, 14, -14], ['geo.c2', 'Актобе', 57.2, 50.28, 0, 14, 30], ['geo.c3', 'Караганда', 73.1, 49.8, 0, 16, 26], ['geo.c4', 'Шымкент', 69.6, 42.3, 0, 14, -12]];
+  const C = [['geo.c1', 'Астана', 71.45, 51.17, 1, 14, -14], ['geo.c2', 'Актобе', 57.2, 50.28, 0, 14, 30], ['geo.c3', 'Караганда', 73.1, 49.8, 0, 16, 26], ['geo.c4', 'Шымкент', 69.6, 42.3, 0, -14, -14, 1]];
   const ax = X(C[0][2]), ay = Y(C[0][3]);
   let s = `<svg class="sc mp" viewBox="0 0 930 520"><path d="${d}" transform="translate(8 10)" fill="#1F6E86" opacity=".14"/><path class="land" d="${d}"/>`;
   for (let i = 1; i < 6; i++) s += `<path class="land2" d="M${150 * i} 20V500"/>`;
@@ -434,7 +434,7 @@ function init() {
   prev.addEventListener('click', () => strip.scrollBy({ left: -step(), behavior: RM ? 'auto' : 'smooth' }));
   next.addEventListener('click', () => strip.scrollBy({ left: step(), behavior: RM ? 'auto' : 'smooth' }));
   strip.addEventListener('scroll', upd, { passive: true }); addEventListener('resize', upd); upd();
-  const sio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-in'); sio.unobserve(e.target); } }), { threshold: .25 });
+  const sio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-in'); sio.unobserve(e.target); } }), { threshold: .1 });
   $$('.shot').forEach(s => sio.observe(s));
   /* фото тура и ленты «до/после» грузятся, когда блок подходит к экрану (не мешают первому экрану) */
   const setSrc = im => { if (!im.dataset.src) return; im.src = im.dataset.src; im.removeAttribute('data-src'); const sh = im.closest('.shot-img'); if (sh) sh.style.setProperty('--src', `url("${im.getAttribute('src')}")`); };
