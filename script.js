@@ -14,7 +14,7 @@ if (hasG) { gsap.registerPlugin(ScrollTrigger); if (window.SplitText) gsap.regis
 /* ================= сцена тракта ================= */
 const CFG = {
   d: { W: 1600, H: 900, G: 850, R1: 590, ST: 22, dy1: 626, dy2: 670, HX: 300, hbw: 172, hby: 726, neck: 42, stove: { x: 180, w: 240, y: 784 },
-       SX: 1190, sw: 70, BX: 1050, BR: 1800, T: 250, M: 420, fan: { cy: 200, r: 34, hx: 1140, hw: 190, hy: 150 }, fs: 21, left: -1500, arrows: 16, part: true, chips: true, fanLeft: false, l0: [496, 720], l1: [812, 714] },
+       SX: 1190, sw: 70, BX: 1050, BR: 2700, T: 250, M: 420, fan: { cy: 200, r: 34, hx: 1140, hw: 190, hy: 150 }, fs: 21, left: -1500, arrows: 16, part: true, chips: true, fanLeft: false, l0: [496, 720], l1: [812, 714] },
   m: { W: 760, H: 640, G: 600, R1: 350, ST: 18, dy1: 384, dy2: 428, HX: 196, hbw: 150, hby: 482, neck: 38, stove: { x: 92, w: 208, y: 534 },
        SX: 566, sw: 62, BX: 458, BR: 1000, T: 150, M: 256, fan: { cy: 105, r: 30, hx: 522, hw: 168, hy: 60 }, fs: 25, left: -500, arrows: 10, part: false, chips: false, fanLeft: true, l0: [52, 326, 96], l1: [372, 466] }
 };
@@ -288,7 +288,7 @@ function init() {
   if (page) {
     const mkHero = () => {
       const key = mqM.matches ? 'm' : 'd'; if (key === heroKey) return; heroKey = key;
-      const old = hero; hero = buildTract($('#heroScene'), key, 'h', key === 'm' ? 'xMidYMax slice' : 'xMaxYMax meet');
+      const old = hero; hero = buildTract($('#heroScene'), key, 'h', key === 'm' ? 'xMidYMax slice' : 'xMidYMax meet');
       if (old) { scenes.splice(scenes.indexOf(old), 1); hero.render(old.p); } scenes.push(hero);
     };
     mkHero();
@@ -333,15 +333,19 @@ function init() {
 
   if (!page) return;
 
-  /* герой: закрепление и фронт очистки */
-  const wrap = $('.hero-wrap'), heroEl = $('.hero'), meter = $('.hero-meter i');
-  const hs = { intro: 0, prog: 0 };
-  function layoutHero() {
-    if (RM) { hero.render(1); return; }
-    if (mqM.matches) { const h = heroEl.offsetHeight; wrap.style.setProperty('--hh', h + 'px'); wrap.classList.add('is-pin'); heroEl.style.top = Math.min(0, innerHeight - h) + 'px'; }
-    else { wrap.classList.remove('is-pin'); heroEl.style.top = ''; }
-  }
-  const heroRender = () => { const p = Math.max(hs.intro, clamp(hs.prog / .86)); hero.render(p); if (meter) meter.style.transform = `scaleX(${p.toFixed(3)})`; };
+  /* герой: фронт очистки запускается кнопкой (без закрепления и без привязки к прокрутке) */
+  const heroEl = $('.hero'), meter = $('.hero-meter i'), playBtn = $('.hero-play');
+  const hs = { p: 0 };
+  function layoutHero() { if (RM) { hs.p = 1; heroRender(); } }
+  const heroRender = () => { hero.render(hs.p); if (meter) meter.style.transform = `scaleX(${hs.p.toFixed(3)})`; };
+  let playTw = null;
+  const playLbl = done => $$('span[data-i18n]', playBtn).forEach((s, i) => { s.hidden = done ? i === 0 : i === 1; });
+  if (playBtn) playBtn.addEventListener('click', () => {
+    if (playTw) playTw.kill();
+    if (RM || !hasG) { hs.p = 1; heroRender(); playLbl(true); return; }
+    hs.p = 0; heroRender(); playBtn.classList.add('is-run');
+    playTw = gsap.to(hs, { p: 1, duration: 8, ease: 'power1.inOut', onUpdate: heroRender, onComplete: () => { playBtn.classList.remove('is-run'); playLbl(true); } });
+  });
   layoutHero();
   let lastW = innerWidth; addEventListener('resize', () => { if (innerWidth !== lastW) { lastW = innerWidth; layoutHero(); if (hasG) ScrollTrigger.refresh(); } });
 
@@ -378,11 +382,9 @@ function init() {
     /* герой: интро */
     const lay = hero.svgs;
     gsap.from(lay, { opacity: 0, y: i => [0, 40, 30, 18, 0][i], duration: 1.2, stagger: .09, delay: .1, clearProps: 'transform,opacity' });
-    const tw = { v: 0 }; gsap.to(hs, { intro: SEG[0] - .002, duration: 2.4, delay: 1.1, ease: 'power2.inOut', onUpdate: heroRender });
     const txt = $('.hero-txt');
     /* интро текста - только если скрипты пришли быстро (класс pre ещё стоит); пришли поздно - текст уже виден, не мигаем */
     if (document.documentElement.classList.contains('pre')) { document.documentElement.classList.remove('pre'); gsap.from([$('.kicker', txt), $('.btns', txt), $('.ig-link', txt)], { opacity: 0, y: 22, duration: .9, stagger: .1, delay: .15, clearProps: 'all' }); }
-    ScrollTrigger.create({ trigger: wrap, start: 'top top', end: 'bottom bottom', scrub: .6, onUpdate: s => { hs.prog = s.progress; heroRender(); gsap.set(hero.far, { y: -s.progress * 26 }); } });
     if (matchMedia('(hover:hover)').matches) { const qx = gsap.quickTo(hero.far, 'x', { duration: .8 }); heroEl.addEventListener('pointermove', e => { if (heroKey === 'd') qx((e.clientX / innerWidth - .5) * -26); }); }
 
     /* появление секций */
@@ -402,7 +404,7 @@ function init() {
     gsap.to('.pfill', { scaleX: 1, scaleY: 1, ease: 'none', scrollTrigger: { trigger: '.steps', start: 'top 80%', end: 'bottom 55%', scrub: .5 } });
     $$('[data-count]').forEach(el => { const n = +el.dataset.count, o = { v: 0 }; gsap.to(o, { v: n, duration: 1.6, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 88%' }, onUpdate: () => el.textContent = Math.round(o.v) }); });
     gsap.to('.req-bg svg', { yPercent: -18, ease: 'none', scrollTrigger: { trigger: '.req-sec', start: 'top bottom', end: 'bottom top', scrub: true } });
-  } else { hero.render(1); document.documentElement.classList.remove('pre'); }
+  } else { document.documentElement.classList.remove('pre'); }
 
   /* бегущие строки */
   const marqs = [];
