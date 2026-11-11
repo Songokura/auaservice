@@ -32,7 +32,7 @@
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/golos-text-cyrillic.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/commissioner-latin.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/golos-text-latin.woff2" crossorigin>
-<link rel="stylesheet" href="styles.css?v=20261111-3">
+<link rel="stylesheet" href="styles.css?v=20261111-8">
 <script>document.documentElement.classList.add('pre');setTimeout(function(){document.documentElement.classList.remove('pre')},1200);</script>
 <script type="application/ld+json">
 {
@@ -182,54 +182,47 @@
     <h2 data-i18n="vent.h2">Очистка системы от зонта до вентилятора</h2>
     <p class="lead" data-i18n="vent.lead">Отложения накапливаются на всём пути воздуха, поэтому очищаем каждый узел системы и после очистки проводим дезинфекцию.</p>
   </div>
-  <div class="tour" id="tour">
-    <span class="tour-a" id="zonty"></span>
-    <span class="tour-a" id="vozduhovody"></span>
-    <span class="tour-a" id="shahty"></span>
-    <span class="tour-a" id="ventilyatory"></span>
-    <div class="tour-stage">
-      <div class="tour-in">
-        <div class="tour-panel">
-          <ol class="rail" aria-hidden="true">
-            <li class="is-on"><a href="#zonty" data-i18n="sc.hood">Зонт и фильтры</a></li>
-            <li><a href="#vozduhovody" data-i18n="sc.duct">Воздуховоды</a></li>
-            <li><a href="#shahty" data-i18n="sc.shaft">Шахта</a></li>
-            <li><a href="#ventilyatory" data-i18n="sc.fan">Вентилятор</a></li>
-          </ol>
-          <div class="stops">
-            <article class="stop is-on">
-              <h3 data-i18n="vent.s1.t">Кухонные зонты и фильтры</h3>
-              <p data-i18n="vent.s1.d">Очистка зонтов и фильтров от жировых отложений.</p>
-              <a class="btn btn-accent" href="https://wa.me/77000333363?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9D%D1%83%D0%B6%D0%B5%D0%BD%20%D1%80%D0%B0%D1%81%D1%87%D1%91%D1%82%20%D0%BE%D1%87%D0%B8%D1%81%D1%82%D0%BA%D0%B8%20%D0%B2%D0%B5%D0%BD%D1%82%D0%B8%D0%BB%D1%8F%D1%86%D0%B8%D0%B8.%0A%D0%A3%D0%B7%D0%B5%D0%BB%3A%20%D0%9A%D1%83%D1%85%D0%BE%D0%BD%D0%BD%D1%8B%D0%B5%20%D0%B7%D0%BE%D0%BD%D1%82%D1%8B%20%D0%B8%20%D1%84%D0%B8%D0%BB%D1%8C%D1%82%D1%80%D1%8B%0A%D0%9E%D0%B1%D1%8A%D0%B5%D0%BA%D1%82%3A%20" target="_blank" rel="noopener"><svg width="20" height="20"><use href="#ic-wa"/></svg><span data-i18n="vent.s1.b">Рассчитать очистку зонтов</span></a>
-            </article>
-            <article class="stop">
-              <h3 data-i18n="vent.s2.t">Воздуховоды</h3>
-              <p data-i18n="vent.s2.d">Очистка внутренних поверхностей воздуховодов от жировых и пылевых отложений.</p>
-              <a class="btn btn-accent" href="https://wa.me/77000333363?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9D%D1%83%D0%B6%D0%B5%D0%BD%20%D1%80%D0%B0%D1%81%D1%87%D1%91%D1%82%20%D0%BE%D1%87%D0%B8%D1%81%D1%82%D0%BA%D0%B8%20%D0%B2%D0%B5%D0%BD%D1%82%D0%B8%D0%BB%D1%8F%D1%86%D0%B8%D0%B8.%0A%D0%A3%D0%B7%D0%B5%D0%BB%3A%20%D0%92%D0%BE%D0%B7%D0%B4%D1%83%D1%85%D0%BE%D0%B2%D0%BE%D0%B4%D1%8B%0A%D0%9E%D0%B1%D1%8A%D0%B5%D0%BA%D1%82%3A%20" target="_blank" rel="noopener"><svg width="20" height="20"><use href="#ic-wa"/></svg><span data-i18n="vent.s2.b">Рассчитать очистку воздуховодов</span></a>
-            </article>
-            <article class="stop">
-              <h3 data-i18n="vent.s3.t">Вентиляционные шахты</h3>
-              <p data-i18n="vent.s3.d">Очистка вентиляционных шахт от пылевых и других отложений.</p>
-              <a class="btn btn-accent" href="https://wa.me/77000333363?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9D%D1%83%D0%B6%D0%B5%D0%BD%20%D1%80%D0%B0%D1%81%D1%87%D1%91%D1%82%20%D0%BE%D1%87%D0%B8%D1%81%D1%82%D0%BA%D0%B8%20%D0%B2%D0%B5%D0%BD%D1%82%D0%B8%D0%BB%D1%8F%D1%86%D0%B8%D0%B8.%0A%D0%A3%D0%B7%D0%B5%D0%BB%3A%20%D0%92%D0%B5%D0%BD%D1%82%D0%B8%D0%BB%D1%8F%D1%86%D0%B8%D0%BE%D0%BD%D0%BD%D1%8B%D0%B5%20%D1%88%D0%B0%D1%85%D1%82%D1%8B%0A%D0%9E%D0%B1%D1%8A%D0%B5%D0%BA%D1%82%3A%20" target="_blank" rel="noopener"><svg width="20" height="20"><use href="#ic-wa"/></svg><span data-i18n="vent.s3.b">Рассчитать очистку шахт</span></a>
-            </article>
-            <article class="stop">
-              <h3 data-i18n="vent.s4.t">Вентиляторы</h3>
-              <p data-i18n="vent.s4.d">Очистка рабочих колёс и корпусов вентиляторов.</p>
-              <a class="btn btn-accent" href="https://wa.me/77000333363?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9D%D1%83%D0%B6%D0%B5%D0%BD%20%D1%80%D0%B0%D1%81%D1%87%D1%91%D1%82%20%D0%BE%D1%87%D0%B8%D1%81%D1%82%D0%BA%D0%B8%20%D0%B2%D0%B5%D0%BD%D1%82%D0%B8%D0%BB%D1%8F%D1%86%D0%B8%D0%B8.%0A%D0%A3%D0%B7%D0%B5%D0%BB%3A%20%D0%92%D0%B5%D0%BD%D1%82%D0%B8%D0%BB%D1%8F%D1%82%D0%BE%D1%80%D1%8B%0A%D0%9E%D0%B1%D1%8A%D0%B5%D0%BA%D1%82%3A%20" target="_blank" rel="noopener"><svg width="20" height="20"><use href="#ic-wa"/></svg><span data-i18n="vent.s4.b">Рассчитать очистку вентиляторов</span></a>
-            </article>
-          </div>
+    <div class="wrap vnt">
+    <span class="tour-a" id="zonty"></span><span class="tour-a" id="vozduhovody"></span><span class="tour-a" id="shahty"></span><span class="tour-a" id="ventilyatory"></span>
+    <div class="vnt-board"><div class="vnt-scheme" id="ventScheme" aria-hidden="true"></div><span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span></div>
+    <ol class="vnt-cards">
+      <li class="vc is-on" data-i="0">
+        <button class="vc-tab" type="button" aria-pressed="true"><span data-i18n="sc.hood">Зонт и фильтры</span><i class="vc-bar"><b></b></i></button>
+        <div class="vc-body">
+          <figure class="vc-ph"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="assets/photos/foto-26.webp" width="1600" height="600" loading="lazy" alt="Фильтры кухонного зонта до и после очистки"></figure>
+          <h3 data-i18n="vent.s1.t">Кухонные зонты и фильтры</h3>
+          <p data-i18n="vent.s1.d">Очистка зонтов и фильтров от жировых отложений.</p>
+          <a class="btn btn-line" href="https://wa.me/77000333363?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9D%D1%83%D0%B6%D0%B5%D0%BD%20%D1%80%D0%B0%D1%81%D1%87%D1%91%D1%82%20%D0%BE%D1%87%D0%B8%D1%81%D1%82%D0%BA%D0%B8%20%D0%B2%D0%B5%D0%BD%D1%82%D0%B8%D0%BB%D1%8F%D1%86%D0%B8%D0%B8.%0A%D0%A3%D0%B7%D0%B5%D0%BB%3A%20%D0%9A%D1%83%D1%85%D0%BE%D0%BD%D0%BD%D1%8B%D0%B5%20%D0%B7%D0%BE%D0%BD%D1%82%D1%8B%20%D0%B8%20%D1%84%D0%B8%D0%BB%D1%8C%D1%82%D1%80%D1%8B%0A%D0%9E%D0%B1%D1%8A%D0%B5%D0%BA%D1%82%3A%20" target="_blank" rel="noopener"><svg width="20" height="20"><use href="#ic-wa"/></svg><span data-i18n="vent.s1.b">Рассчитать очистку зонтов</span></a>
         </div>
-        <div class="tour-view">
-          <div class="tour-win"><div class="scene" id="tourScene" aria-hidden="true"></div><span class="tick tl"></span><span class="tick tr"></span><span class="tick bl"></span><span class="tick br"></span></div>
-          <div class="tour-photos">
-            <figure class="pair is-on"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="assets/photos/foto-26.webp" width="1600" height="600" loading="lazy" alt="Фильтры кухонного зонта до и после очистки"><figcaption data-i18n="res.c.filters">Фильтры зонта</figcaption></figure>
-            <figure class="pair"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="assets/photos/foto-13.webp" width="1600" height="600" loading="lazy" alt="Воздуховод до и после очистки"><figcaption data-i18n="res.c.duct">Воздуховод</figcaption></figure>
-            <figure class="pair"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="assets/photos/foto-18.webp" width="1600" height="600" loading="lazy" alt="Вентиляционная шахта до и после очистки"><figcaption data-i18n="res.c.shaft">Шахта</figcaption></figure>
-            <figure class="pair"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="assets/photos/foto-21.webp" width="1600" height="600" loading="lazy" alt="Вентилятор до и после очистки"><figcaption data-i18n="res.c.fan">Вентилятор</figcaption></figure>
-          </div>
+      </li>
+      <li class="vc" data-i="1">
+        <button class="vc-tab" type="button" aria-pressed="false"><span data-i18n="sc.duct">Воздуховоды</span><i class="vc-bar"><b></b></i></button>
+        <div class="vc-body">
+          <figure class="vc-ph"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="assets/photos/foto-13.webp" width="1600" height="600" loading="lazy" alt="Воздуховод до и после очистки"></figure>
+          <h3 data-i18n="vent.s2.t">Воздуховоды</h3>
+          <p data-i18n="vent.s2.d">Очистка внутренних поверхностей воздуховодов от жировых и пылевых отложений.</p>
+          <a class="btn btn-line" href="https://wa.me/77000333363?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9D%D1%83%D0%B6%D0%B5%D0%BD%20%D1%80%D0%B0%D1%81%D1%87%D1%91%D1%82%20%D0%BE%D1%87%D0%B8%D1%81%D1%82%D0%BA%D0%B8%20%D0%B2%D0%B5%D0%BD%D1%82%D0%B8%D0%BB%D1%8F%D1%86%D0%B8%D0%B8.%0A%D0%A3%D0%B7%D0%B5%D0%BB%3A%20%D0%92%D0%BE%D0%B7%D0%B4%D1%83%D1%85%D0%BE%D0%B2%D0%BE%D0%B4%D1%8B%0A%D0%9E%D0%B1%D1%8A%D0%B5%D0%BA%D1%82%3A%20" target="_blank" rel="noopener"><svg width="20" height="20"><use href="#ic-wa"/></svg><span data-i18n="vent.s2.b">Рассчитать очистку воздуховодов</span></a>
         </div>
-      </div>
-    </div>
+      </li>
+      <li class="vc" data-i="2">
+        <button class="vc-tab" type="button" aria-pressed="false"><span data-i18n="sc.shaft">Шахта</span><i class="vc-bar"><b></b></i></button>
+        <div class="vc-body">
+          <figure class="vc-ph"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="assets/photos/foto-18.webp" width="1600" height="600" loading="lazy" alt="Вентиляционная шахта до и после очистки"></figure>
+          <h3 data-i18n="vent.s3.t">Вентиляционные шахты</h3>
+          <p data-i18n="vent.s3.d">Очистка вентиляционных шахт от пылевых и других отложений.</p>
+          <a class="btn btn-line" href="https://wa.me/77000333363?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9D%D1%83%D0%B6%D0%B5%D0%BD%20%D1%80%D0%B0%D1%81%D1%87%D1%91%D1%82%20%D0%BE%D1%87%D0%B8%D1%81%D1%82%D0%BA%D0%B8%20%D0%B2%D0%B5%D0%BD%D1%82%D0%B8%D0%BB%D1%8F%D1%86%D0%B8%D0%B8.%0A%D0%A3%D0%B7%D0%B5%D0%BB%3A%20%D0%92%D0%B5%D0%BD%D1%82%D0%B8%D0%BB%D1%8F%D1%86%D0%B8%D0%BE%D0%BD%D0%BD%D1%8B%D0%B5%20%D1%88%D0%B0%D1%85%D1%82%D1%8B%0A%D0%9E%D0%B1%D1%8A%D0%B5%D0%BA%D1%82%3A%20" target="_blank" rel="noopener"><svg width="20" height="20"><use href="#ic-wa"/></svg><span data-i18n="vent.s3.b">Рассчитать очистку шахт</span></a>
+        </div>
+      </li>
+      <li class="vc" data-i="3">
+        <button class="vc-tab" type="button" aria-pressed="false"><span data-i18n="sc.fan">Вентилятор</span><i class="vc-bar"><b></b></i></button>
+        <div class="vc-body">
+          <figure class="vc-ph"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="assets/photos/foto-21.webp" width="1600" height="600" loading="lazy" alt="Вентилятор до и после очистки"></figure>
+          <h3 data-i18n="vent.s4.t">Вентиляторы</h3>
+          <p data-i18n="vent.s4.d">Очистка рабочих колёс и корпусов вентиляторов.</p>
+          <a class="btn btn-line" href="https://wa.me/77000333363?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%9D%D1%83%D0%B6%D0%B5%D0%BD%20%D1%80%D0%B0%D1%81%D1%87%D1%91%D1%82%20%D0%BE%D1%87%D0%B8%D1%81%D1%82%D0%BA%D0%B8%20%D0%B2%D0%B5%D0%BD%D1%82%D0%B8%D0%BB%D1%8F%D1%86%D0%B8%D0%B8.%0A%D0%A3%D0%B7%D0%B5%D0%BB%3A%20%D0%92%D0%B5%D0%BD%D1%82%D0%B8%D0%BB%D1%8F%D1%82%D0%BE%D1%80%D1%8B%0A%D0%9E%D0%B1%D1%8A%D0%B5%D0%BA%D1%82%3A%20" target="_blank" rel="noopener"><svg width="20" height="20"><use href="#ic-wa"/></svg><span data-i18n="vent.s4.b">Рассчитать очистку вентиляторов</span></a>
+        </div>
+      </li>
+    </ol>
   </div>
 </section>
 
@@ -517,7 +510,7 @@
 <script>
 /* скрипты сцены грузятся после первой отрисовки: текст героя показывается сразу */
 (function () {
-  var L = ['assets/vendor/gsap.min.js', 'assets/vendor/ScrollTrigger.min.js', 'assets/vendor/SplitText.min.js', 'assets/vendor/lenis.min.js', 'script.js?v=20261111-3'];
+  var L = ['assets/vendor/gsap.min.js', 'assets/vendor/ScrollTrigger.min.js', 'assets/vendor/SplitText.min.js', 'assets/vendor/lenis.min.js', 'script.js?v=20261111-8'];
   function go() { L.forEach(function (u) { var s = document.createElement('script'); s.src = u; s.async = false; document.body.appendChild(s); }); }
   requestAnimationFrame(function () { setTimeout(go, 0); });
 })();

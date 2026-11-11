@@ -14,7 +14,7 @@ if (hasG) { gsap.registerPlugin(ScrollTrigger); if (window.SplitText) gsap.regis
 /* ================= сцена тракта ================= */
 const CFG = {
   d: { W: 1600, H: 900, G: 850, R1: 590, ST: 22, dy1: 626, dy2: 670, HX: 300, hbw: 172, hby: 726, neck: 42, stove: { x: 180, w: 240, y: 784 },
-       SX: 1190, sw: 70, BX: 1050, BR: 2700, T: 250, M: 420, fan: { cy: 200, r: 34, hx: 1140, hw: 190, hy: 150 }, fs: 21, left: -1500, arrows: 16, part: true, chips: true, fanLeft: false, l0: [496, 720], l1: [812, 714] },
+       SX: 1310, sw: 70, BX: 1170, BR: 2700, T: 250, M: 420, fan: { cy: 200, r: 34, hx: 1260, hw: 190, hy: 150 }, fs: 21, left: -1500, arrows: 16, part: true, chips: true, fanLeft: false, l0: [496, 720], l1: [812, 714], l3: [1404, 312] },
   m: { W: 760, H: 640, G: 600, R1: 350, ST: 18, dy1: 384, dy2: 428, HX: 196, hbw: 150, hby: 482, neck: 38, stove: { x: 92, w: 208, y: 534 },
        SX: 566, sw: 62, BX: 458, BR: 1000, T: 150, M: 256, fan: { cy: 105, r: 30, hx: 522, hw: 168, hy: 60 }, fs: 25, left: -500, arrows: 10, part: false, chips: false, fanLeft: true, l0: [52, 326, 96], l1: [372, 466] }
 };
@@ -124,7 +124,7 @@ function buildTract(host, key, id, par) {
   if (c.l0[2]) t += `<path class="thin" d="M${c.l0[2]} ${c.l0[1] + 8}V${dy2 + 14}" style="opacity:.8"/>`;
   t += lbl('l0', c.l0[0], c.l0[1], 'sc.hood', 'Зонт и фильтры') + lbl('l1', c.l1[0], c.l1[1], 'sc.duct', 'Воздуховоды');
   t += lbl('l2', SX + sw + 22, (M + R1) / 2 + 30, 'sc.shaft', 'Шахта');
-  t += c.fanLeft ? lbl('l3', f.hx - 18, f.cy + 8, 'sc.fan', 'Вентилятор', true) : lbl('l3', f.hx + f.hw + 22, f.cy + 8, 'sc.fan', 'Вентилятор');
+  t += c.l3 ? lbl('l3', c.l3[0], c.l3[1], 'sc.fan', 'Вентилятор') : c.fanLeft ? lbl('l3', f.hx - 18, f.cy + 8, 'sc.fan', 'Вентилятор', true) : lbl('l3', f.hx + f.hw + 22, f.cy + 8, 'sc.fan', 'Вентилятор');
   t += `<g data-k="chips" opacity="0"><text data-k="chc" class="lbl-sub" font-size="${fs * .86}" text-anchor="end" style="fill:#1F6E86" data-i18n="sc.clean">Очищено</text><text data-k="chd" class="lbl-sub" font-size="${fs * .86}" style="fill:#B07A35" data-i18n="sc.dep">Отложения</text></g></svg>`;
 
   /* поток, пар, ротор */
@@ -188,6 +188,95 @@ function buildTract(host, key, id, par) {
   return S;
 }
 
+/* ================= схема вентиляции: узлы на одной линии, очистка идёт сама по кругу ================= */
+function buildScheme(host) {
+  const VW = 1200, VH = 400, ST = 3.6, HOLD = 1.8, BACK = 1, CYC = ST * 4 + HOLD + BACK;
+  let s = `<svg class="sc vs" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMid meet">`;
+  /* монтажная сетка и размерные линии */
+  s += `<path class="vs-dim" d="M60 382H1140M60 376v12M340 376v12M700 376v12M770 376v12M1140 376v12"/>`;
+  /* узел 1: зонт */
+  s += `<g class="vs-node" data-n="0"><path class="vs-ln" d="M50 300H350L262 228H138Z"/><path class="vs-ln" d="M175 228V190M225 228V190"/>`;
+  for (let i = 0; i < 9; i++) s += `<path class="vs-th" d="M${92 + i * 26} 294l18-56"/>`;
+  s += `<path class="vs-th" d="M120 336h160M150 336v-14M200 336v-20M250 336v-14" style="opacity:.5"/></g>`;
+  /* узел 2: воздуховод */
+  s += `<g class="vs-node" data-n="1"><path class="vs-ln" d="M175 150H700M225 190H700M175 150V190"/>`;
+  for (let x = 280; x < 700; x += 105) s += `<path class="vs-ln" d="M${x} 142v56" style="stroke-width:2"/>`;
+  s += `</g>`;
+  /* узел 3: шахта через перекрытия */
+  s += `<g class="vs-node" data-n="2"><path class="vs-ln" d="M700 100V150M700 190V330M770 60V330M700 60V60"/><path class="vs-ln" d="M700 60H770" style="opacity:0"/>`;
+  [116, 246].forEach(y => s += `<rect class="vs-slab" x="640" y="${y}" width="190" height="12"/>`);
+  s += `<path class="vs-ln" d="M690 334l10-8 12 10 12-10 12 10 12-10 12 10 10-8" style="stroke-width:2"/></g>`;
+  /* выход и узел 4: вентилятор */
+  s += `<g class="vs-node" data-n="3"><path class="vs-ln" d="M700 60V100M700 60H900M770 100H900"/><rect class="vs-ln" x="900" y="14" width="160" height="132" rx="14"/><circle class="vs-ln" cx="980" cy="80" r="48"/><g class="vs-rotor" transform="translate(980 80)">`;
+  for (let i = 0; i < 6; i++) s += `<path transform="rotate(${i * 60})" d="M0 0Q20-20 40-6L38 4Q20-6 0 0Z"/>`;
+  s += `</g><circle cx="980" cy="80" r="6" class="vs-hub"/><path class="vs-ex" d="M1078 80h56m-12-10 12 10-12 10M1078 52h40m-10-8 10 8-10 8M1078 108h40m-10-8 10 8-10 8"/></g>`;
+  /* поток воздуха по оси */
+  const AIR = ['M200 290V170', 'M200 170H735', 'M735 300V80', 'M735 80H980'];
+  AIR.forEach((d, i) => s += `<path class="vs-air" data-a="${i}" d="${d}"/>`);
+  /* отложения: зонт (по x), воздуховод (по x), шахта (по y снизу вверх), вентилятор (по кругу) */
+  const dep = [];
+  for (let i = 0; i < 8; i++) { const x = 84 + i * 30; dep.push([0, (x - 84) / 230, `<path class="vs-dep" d="M${x} 292l${16 + (i % 2) * 4}-50h10l-${12 + (i % 3) * 4} 50z"/>`]); }
+  for (let x = 182; x < 696; x += 20) dep.push([1, (x - 182) / 514, `<rect class="vs-dep" x="${x}" y="${178 + (x % 3)}" width="18" height="${9 - (x % 3)}" rx="4"/>`, `<circle class="vs-dep" cx="${x + 9}" cy="${158}" r="${2 + (x % 4)}"/>`]);
+  for (let y = 318; y > 68; y -= 20) dep.push([2, (318 - y) / 250, `<rect class="vs-dep" x="703" y="${y}" width="${8 + (y % 3)}" height="16" rx="4"/><rect class="vs-dep" x="${759 - (y % 3)}" y="${y - 6}" width="${8 + (y % 3)}" height="16" rx="4"/>`]);
+  for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2; dep.push([3, i / 10, `<circle class="vs-dep" cx="${(980 + Math.cos(a) * 36).toFixed(1)}" cy="${(80 + Math.sin(a) * 36).toFixed(1)}" r="${6 + (i % 3)}"/>`]); }
+  s += `<g class="vs-deps">` + dep.map((d, i) => `<g data-d="${i}">${d.slice(2).join('')}</g>`).join('') + `</g>`;
+  /* щётка */
+  s += `<g class="vs-brush"><circle r="20" class="vs-glow"/><g class="vs-br">`;
+  for (let i = 0; i < 12; i++) s += `<path transform="rotate(${i * 30})" d="M0 5V16"/>`;
+  s += `</g><circle r="6" class="vs-hub2"/></g>`;
+  /* подписи узлов */
+  [['sc.hood', 'Зонт и фильтры', 200, 362, 0], ['sc.duct', 'Воздуховоды', 452, 232, 1], ['sc.shaft', 'Шахта', 790, 290, 2], ['sc.fan', 'Вентилятор', 980, 182, 3]].forEach(l => s += `<text class="vs-lbl" data-l="${l[4]}" x="${l[2]}" y="${l[3]}" ${l[4] === 2 ? '' : 'text-anchor="middle"'} data-i18n="${l[0]}">${l[1]}</text>`);
+  host.innerHTML = s + '</svg>';
+
+  const svg = $('svg', host), q = sel => $$(sel, host);
+  const deps = q('[data-d]'), nodes = q('.vs-node'), airs = q('.vs-air'), lbls = q('.vs-lbl'), brush = $('.vs-brush', host), br = $('.vs-br', host), rotor = $('.vs-rotor', host);
+  const PATH = [[[96, 268], [306, 268]], [[190, 170], [690, 170]], [[735, 318], [735, 76]], [[790, 80], [980, 80]]];
+  const S = { host, active: true, t: 0, auto: !RM, ang: 0, spin: 0, cam: 600, onStage: null, stage: -1 };
+  const opa = [];
+  S.render = () => {
+    const t = S.t; let stage = Math.min(3, Math.floor(t / ST)), k = clamp((t - stage * ST) / ST);
+    const back = t > ST * 4 + HOLD ? clamp((t - ST * 4 - HOLD) / BACK) : 0;
+    if (t >= ST * 4) { stage = 3; k = 1; }
+    const mv = clamp(k / .82), e = mv < .5 ? 2 * mv * mv : 1 - Math.pow(-2 * mv + 2, 2) / 2;
+    /* где щётка */
+    const [[x1, y1], [x2, y2]] = PATH[stage]; let bx = lerp(x1, x2, stage === 3 ? clamp(e / .55) : e), by = lerp(y1, y2, stage === 3 ? clamp(e / .55) : e);
+    brush.setAttribute('transform', `translate(${bx.toFixed(1)} ${by.toFixed(1)})`);
+    brush.style.opacity = t >= ST * 4 ? Math.max(0, 1 - (t - ST * 4) / .5) : (k > .96 && stage < 3 ? 0 : 1);
+    /* какие отложения сняты */
+    deps.forEach((g, i) => {
+      const d = dep[i]; let o;
+      if (d[0] < stage) o = 0; else if (d[0] > stage) o = 1;
+      else { const f = stage === 3 ? clamp((e - .55) / .45) : e; o = f > d[1] + .02 ? 0 : 1; }
+      if (t >= ST * 4) o = 0;
+      o = Math.max(o, back);
+      if (opa[i] !== o) { opa[i] = o; g.style.opacity = o; }
+    });
+    const done = i => t >= ST * 4 ? back < .5 : i < stage || (i === stage && k >= .82);
+    nodes.forEach((n, i) => { n.classList.toggle('is-on', i === stage && t < ST * 4); n.classList.toggle('is-clean', done(i)); });
+    lbls.forEach((n, i) => n.classList.toggle('is-on', i === stage && t < ST * 4));
+    airs.forEach((a, i) => a.classList.toggle('is-clean', done(i)));
+    S.spin = done(3) ? 1 : .08;
+    if (stage !== S.stage) { S.stage = stage; if (S.onStage) S.onStage(stage); }
+    if (S.onProg) S.onProg(stage, t >= ST * 4 ? 1 : k);
+    /* узкий экран: окно схемы идёт за щёткой */
+    if (host.clientWidth && host.clientWidth / Math.max(1, host.clientHeight) < 2.2) {
+      const w = 640, cx = clamp(bx, w / 2, VW - w / 2); S.cam += (cx - S.cam) * .08;
+      svg.setAttribute('viewBox', `${(S.cam - w / 2).toFixed(1)} 0 ${w} ${VH}`);
+    } else if (svg.getAttribute('viewBox') !== `0 0 ${VW} ${VH}`) svg.setAttribute('viewBox', `0 0 ${VW} ${VH}`);
+  };
+  S.go = i => { S.t = i * ST + .001; S.render(); };
+  S.tick = dt => {
+    if (!S.active) return;
+    if (S.auto) { S.t = (S.t + dt) % CYC; }
+    S.ang = (S.ang + dt * lerp(40, 620, S.spin)) % 360; rotor.setAttribute('transform', `translate(980 80) rotate(${S.ang.toFixed(1)})`);
+    br.setAttribute('transform', `rotate(${(S.ang * 2.4 % 360).toFixed(1)})`);
+    S.render();
+  };
+  if (RM) S.t = ST * 4 + .01;
+  S.render();
+  return S;
+}
+
 /* ================= сцена ДДД ================= */
 function buildDDD(host) {
   let s = `<svg class="sc dd" viewBox="0 0 900 620" preserveAspectRatio="xMidYMid slice"><defs><pattern id="dht" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V14" stroke="#0F2E3B" stroke-width="1.2" opacity=".35"/></pattern><pattern id="dtl" width="34" height="34" patternUnits="userSpaceOnUse"><path d="M34 0V34H0" fill="none" stroke="#0F2E3B" stroke-width="1" opacity=".1"/></pattern></defs>`;
@@ -202,15 +291,64 @@ function buildDDD(host) {
   s += `<path class="ink" d="M560 540V436h120V540M560 470h120"/><path class="ink" d="M585 436v-10q0-16 16-16h8v10" style="stroke-width:2.2"/><path class="ink" d="M572 436q0 22 20 22h54q20 0 20-22" style="stroke-width:1.8"/>`;
   s += `<path class="ink" d="M700 540V436h136V540M700 500h136"/><rect class="ink-f" x="716" y="406" width="40" height="30" rx="3" style="stroke-width:1.8"/><rect class="ink-f" x="778" y="414" width="44" height="22" rx="10" style="stroke-width:1.8"/>`;
   s += `<path class="ink" d="M-200 540H1100" style="stroke-width:3.4"/><path class="ink" d="M610 540h30" style="stroke-width:6;stroke:#1F6E86"/>`;
-  // дезинсекция
-  const sp = (x, y) => `<g transform="translate(${x} ${y})"><path class="spray" d="M0 0L-26-44A52 52 0 0 1 26-44Z"/><circle r="6" class="or"/><circle r="9" class="ring"/></g>`;
-  s += `<g class="cp cp-ins">` + [[66, 534], [262, 534], [454, 534], [552, 534], [625, 536], [690, 534], [846, 534], [165, 446], [365, 356]].map(q => sp(q[0], q[1])).join('') + `</g>`;
-  // дератизация
-  const bait = (x) => `<g transform="translate(${x} 540)"><rect x="-17" y="-18" width="34" height="18" rx="3" fill="#0F2E3B"/><rect x="-17" y="-18" width="34" height="6" rx="3" class="or"/><circle cx="0" cy="-9" r="14" class="ring"/></g>`;
-  s += `<g class="cp cp-rat"><path class="route" d="M52 528H458M494 528H848M52 528V120M848 528V120"/>` + [58, 264, 448, 506, 842].map(bait).join('') + `</g>`;
-  // дезинфекция
-  s += `<g class="cp cp-dis"><path class="surf" d="M562 432h116M702 432h132M-100 40H1000"/><path class="mist" d="M650 110h100l60 150H590z"/><path class="mist" d="M540 330h30v210h-30z"/><g transform="translate(530 440)"><circle r="6" class="teal"/><circle r="9" class="ring" style="stroke:#1F6E86"/></g><g transform="translate(700 104)"><circle r="6" class="teal"/><circle r="9" class="ring" style="stroke:#1F6E86"/></g><g transform="translate(620 430)"><circle r="6" class="teal"/><circle r="9" class="ring" style="stroke:#1F6E86"/></g><g transform="translate(766 430)"><circle r="6" class="teal"/><circle r="9" class="ring" style="stroke:#1F6E86"/></g></g></svg>`;
+  /* дезинсекция: тараканы ползут, волна обработки проходит по помещению - насекомые переворачиваются и исчезают */
+  const roach = `<g class="rc-b"><path class="rc-leg" d="M-5-5l-6-8M2-6l1-10M8-5l7-7M-5 5l-6 8M2 6l1 10M8 5l7 7"/><ellipse rx="13" ry="7.5" class="rc-body"/><path d="M-11 0H9" stroke="#2B1A0E" stroke-width="1.2" opacity=".6"/><ellipse cx="13" rx="5.5" ry="5" class="rc-head"/><path class="rc-ant" d="M17-3q10-9 20-7M17 3q10 9 20 7"/></g>`;
+  const RCH = [[-40, 528, 175, 528], [960, 528, 735, 528], [92, 438, 210, 438], [436, 350, 318, 350], [476, 524, 476, 372], [700, 425, 812, 425]];
+  s += `<g class="cp cp-ins"><rect class="ins-wave" x="-160" y="96" width="140" height="444"/><g class="ins-drops">`;
+  for (let i = 0; i < 14; i++) s += `<circle cx="${-90 + (i % 4) * 22}" cy="${130 + i * 29}" r="${2 + (i % 3)}"/>`;
+  s += `</g>` + RCH.map((r, i) => `<g class="rc" data-r="${i}" transform="translate(${r[0]} ${r[1]})">${roach}</g>`).join('') + `</g>`;
+  /* дератизация: мыши бегут к контейнерам с приманкой, заходят - над контейнером загорается отметка */
+  const mouse = `<g class="ms-b"><path class="ms-tail" d="M-20-6q-20 2-30-12"/><ellipse cy="-11" rx="21" ry="11" class="ms-body"/><circle cx="19" cy="-14" r="8.5" class="ms-body"/><circle cx="14" cy="-24" r="6" class="ms-ear"/><circle cx="23" cy="-16" r="1.8" fill="#0F2E3B"/><circle cx="27.5" cy="-12" r="2" fill="#E59A9A"/><path class="ms-leg" d="M-8 -1v1M8 -1v1"/></g>`;
+  const station = (x) => `<g class="bt" transform="translate(${x} 540)"><rect x="-30" y="-28" width="60" height="28" rx="5" fill="#0F2E3B"/><rect x="-30" y="-28" width="60" height="7" rx="3" class="or bt-lid"/><rect x="-27" y="-14" width="10" height="12" rx="5" fill="#3A5966"/><rect x="17" y="-14" width="10" height="12" rx="5" fill="#3A5966"/><g class="bt-ok" transform="translate(0 -52)"><circle r="15" fill="#1F6E86"/><path d="M-6 0l4 5 8-9" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></g></g>`;
+  s += `<g class="cp cp-rat"><path class="route" d="M-40 532H490M960 532H810"/><g class="ms" data-m="0" transform="translate(-60 540)">${mouse}</g><g class="ms" data-m="1" transform="translate(980 540) scale(-1 1)">${mouse}</g>` + [520, 790].map(station).join('') + `</g>`;
+  /* дезинфекция: микробы на поверхностях, туман расходится от генератора - микробы гаснут, поверхность чистая */
+  const GERM = [[600, 424], [648, 424], [740, 398], [800, 402], [530, 446], [130, 258], [350, 340], [210, 432], [400, 250], [700, 128], [610, 300], [790, 330]];
+  const germ = `<g class="gm-b"><g class="gm-sp">` + Array.from({ length: 8 }, (_, i) => `<path transform="rotate(${i * 45})" d="M0-8V-13"/>`).join('') + `</g><circle r="8" class="gm-c"/><circle cx="-2.5" cy="-2" r="1.8" class="gm-n"/><circle cx="3" cy="2" r="1.4" class="gm-n"/></g>`;
+  s += `<g class="cp cp-dis"><g class="fg" transform="translate(456 540)"><rect x="-20" y="-44" width="40" height="44" rx="6" fill="#0F2E3B"/><rect x="-14" y="-36" width="28" height="7" rx="3" class="teal"/><path d="M0-44v-18h18" fill="none" stroke="#0F2E3B" stroke-width="4" stroke-linecap="round"/><circle cx="20" cy="-62" r="4" class="teal"/></g>`;
+  for (let i = 0; i < 3; i++) s += `<circle class="fg-wave" data-w="${i}" cx="476" cy="478" r="10"/>`;
+  s += `<path class="fg-vent" d="M664 112h72l24 60H640z"/>`;
+  s += GERM.map((g, i) => `<g class="gm" data-g="${i}" transform="translate(${g[0]} ${g[1]})">${germ}<path class="gm-ok" d="M0-13l3 10 10 3-10 3-3 10-3-10-10-3 10-3z"/></g>`).join('') + `</g></svg>`;
   host.innerHTML = s;
+
+  /* сценарии по услугам: каждый идёт сам и по кругу, играет только выбранная услуга */
+  const svg = $('svg', host), TL = {};
+  if (window.gsap && !RM) {
+    const rcs = $$('.rc', svg), wave = $('.ins-wave', svg), drops = $('.ins-drops', svg);
+    const ti = gsap.timeline({ repeat: -1, paused: true, defaults: { ease: 'none' } });
+    rcs.forEach((g, i) => { const r = RCH[i], ang = Math.atan2(r[3] - r[1], r[2] - r[0]) * 180 / Math.PI;
+      ti.set(g, { attr: { transform: `translate(${r[0]} ${r[1]}) rotate(${ang})` }, opacity: 1 }, 0);
+      ti.to(g, { attr: { transform: `translate(${r[2]} ${r[3]}) rotate(${ang})` }, duration: 2.6 + (i % 3) * .3 }, i * .12);
+      const hitX = Math.min(r[0], r[2]) + Math.abs(r[2] - r[0]) * (r[2] > r[0] ? 1 : 0), t = 3.2 + (hitX + 160) / 1120 * 2.8;
+      ti.set($('.rc-b', g), { scaleY: 1, transformOrigin: '50% 50%' }, 0).to($('.rc-b', g), { scaleY: -1, duration: .35, ease: 'power2.out' }, t).to(g, { opacity: 0, duration: .5 }, t + .45); });
+    ti.fromTo([wave, drops], { x: 0, opacity: 1 }, { x: 1120, duration: 2.8 }, 3.2).to([wave, drops], { opacity: 0, duration: .3 }, 6).to({}, { duration: 1.2 }, 6.3);
+    TL.ins = ti;
+
+    const ms = $$('.ms', svg), oks = $$('.bt-ok', svg), lids = $$('.bt-lid', svg);
+    const tr = gsap.timeline({ repeat: -1, paused: true, defaults: { ease: 'none' } });
+    tr.set(oks, { scale: 0, transformOrigin: '50% 50%' }, 0).set(ms, { opacity: 1 }, 0).set(lids, { fill: '#F26A1B' }, 0)
+      .fromTo(ms[0], { attr: { transform: 'translate(-60 540)' } }, { attr: { transform: 'translate(486 540)' }, duration: 2.6 }, 0)
+      .to(ms[0], { opacity: 0, duration: .25 }, 2.6).to(lids[0], { fill: '#1F6E86', duration: .2 }, 2.7).to(oks[0], { scale: 1, duration: .45, ease: 'back.out(2)' }, 2.75)
+      .fromTo(ms[1], { attr: { transform: 'translate(980 540) scale(-1 1)' } }, { attr: { transform: 'translate(826 540) scale(-1 1)' }, duration: 1.6 }, 2.4)
+      .to(ms[1], { opacity: 0, duration: .25 }, 4).to(lids[1], { fill: '#1F6E86', duration: .2 }, 4.1).to(oks[1], { scale: 1, duration: .45, ease: 'back.out(2)' }, 4.15)
+      .to(oks, { scale: 0, duration: .3 }, 6.4).to({}, { duration: .6 }, 6.7);
+    tr.fromTo($$('.ms-b', svg), { y: 0 }, { y: -3, duration: .12, repeat: 35, yoyo: true, ease: 'sine.inOut' }, 0);
+    TL.rat = tr;
+
+    const gms = $$('.gm', svg), waves = $$('.fg-wave', svg), vent = $('.fg-vent', svg);
+    const td = gsap.timeline({ repeat: -1, paused: true });
+    td.set($$('.gm-b', svg), { scale: 0, opacity: 1, transformOrigin: '50% 50%' }, 0).set($$('.gm-ok', svg), { scale: 0, opacity: 1, transformOrigin: '50% 50%' }, 0).set(vent, { opacity: 0 }, 0)
+      .to($$('.gm-b', svg), { scale: 1, duration: .5, ease: 'back.out(2.4)', stagger: .07 }, .1);
+    waves.forEach((w, i) => td.fromTo(w, { attr: { r: 10 }, opacity: .26 }, { attr: { r: 560 }, opacity: 0, duration: 3, ease: 'power1.out' }, 1.6 + i * .45));
+    td.to(vent, { opacity: .5, duration: .5, yoyo: true, repeat: 1 }, 2.8);
+    gms.forEach((g, i) => { const d = Math.hypot(GERM[i][0] - 476, GERM[i][1] - 478), t = 1.6 + Math.pow(d / 560, .8) * 2.4;
+      td.to($('.gm-b', g), { scale: 1.35, duration: .15 }, t).to($('.gm-b', g), { scale: 0, opacity: 0, duration: .3 }, t + .15)
+        .to($('.gm-ok', g), { scale: 1, duration: .3, ease: 'back.out(3)' }, t + .3).to($('.gm-ok', g), { opacity: 0, scale: .6, duration: .5 }, t + 1.3); });
+    td.to({}, { duration: .9 }, td.duration());
+    TL.dis = td;
+  }
+  let cur = null, vis = true;
+  const sync = () => Object.entries(TL).forEach(([k, t]) => { if (k === cur && vis) t.play(); else t.pause(); });
+  return { host, tick() {}, get active() { return vis; }, set active(v) { vis = v; sync(); }, play(k) { if (k === cur) return; cur = k; if (TL[k]) TL[k].restart(); sync(); } };
 }
 
 /* ================= робот ================= */
@@ -282,7 +420,7 @@ const scenes = [];
 let lenis = null;
 function init() {
   const page = !!$('#heroScene');
-  let hero = null, tour = null, heroKey = null;
+  let hero = null, scheme = null, ddd = null, heroKey = null;
   const mqM = matchMedia('(max-width:860px)');
 
   if (page) {
@@ -292,8 +430,8 @@ function init() {
       if (old) { scenes.splice(scenes.indexOf(old), 1); hero.render(old.p); } scenes.push(hero);
     };
     mkHero();
-    tour = buildTract($('#tourScene'), 'd', 't', 'xMidYMid slice'); scenes.push(tour);
-    buildDDD($('#dddScene')); buildRobot($('#robotScene')); buildMap($('#mapScene')); buildFan($('#reqBg'));
+    scheme = buildScheme($('#ventScheme')); scenes.push(scheme);
+    ddd = buildDDD($('#dddScene')); scenes.push(ddd); ddd.play('ins'); buildRobot($('#robotScene')); buildMap($('#mapScene')); buildFan($('#reqBg'));
     mqM.addEventListener('change', () => { mkHero(); applyLang(); layoutHero(); });
   }
   captureRU();
@@ -351,32 +489,18 @@ function init() {
 
   /* живые анимации сцен: один тикер, вне экрана пауза */
   const io = new IntersectionObserver(es => es.forEach(e => { const S = scenes.find(s => s.host === e.target); if (S) S.active = e.isIntersecting; e.target.classList.toggle('is-paused', !e.isIntersecting); }), { rootMargin: '80px' });
-  ['#heroScene', '#tourScene', '#dddScene', '#robotScene', '#mapScene', '#reqBg'].forEach(s => io.observe($(s)));
-  if (!RM) { let last = performance.now(); const loop = (now) => { const dt = Math.min(.05, (now - last) / 1000); last = now; for (const S of scenes) S.tick(dt); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+  ['#heroScene', '#ventScheme', '#dddScene', '#robotScene', '#mapScene', '#reqBg'].forEach(s => io.observe($(s)));
+  if (!RM) { let last = performance.now(); const loop = (now) => { const dt = Math.max(0, Math.min(.05, (now - last) / 1000)); last = now; for (const S of scenes) S.tick(dt); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
 
-  /* тур по узлам */
-  const tourEl = $('#tour'), stops = $$('.stop'), rails = $$('.rail li'), pairs = $$('.tour-photos .pair'), win = $('.tour-win'), anchors = $$('.tour-a');
-  let cur = -1;
-  const setStop = i => { if (i === cur) return; cur = i; stops.forEach((s, k) => s.classList.toggle('is-on', k === i)); pairs.forEach((s, k) => s.classList.toggle('is-on', k === i)); rails.forEach((s, k) => { s.classList.toggle('is-on', k === i); s.classList.toggle('is-done', k < i); }); };
-  const D = CFG.d, cxS = D.SX + D.sw / 2;
-  const cam = { p: 0, cx: 830, cy: 540, w: 1640 };
-  const camDraw = () => { const r = win.clientWidth / Math.max(1, win.clientHeight); let w = cam.w; const h = w / r; tour.view(cam.cx, cam.cy, w, h); tour.render(cam.p); };
-  const K = [
-    [{ cx: D.HX + 30, cy: 716, w: 540 }, { p: SEG[0], cx: D.HX + 40, cy: 704, w: 480 }, .9],
-    [{ cx: D.HX + 190, cy: 668, w: 600 }, { p: SEG[0] + SEG[1], cx: D.SX - 130, cy: 668, w: 600 }, 1.5],
-    [{ cx: cxS + 50, cy: 600, w: 560 }, { p: 1 - SEG[3], cx: cxS + 50, cy: 380, w: 560 }, 1],
-    [{ cx: cxS + 40, cy: 215, w: 470 }, { p: 1, cx: cxS + 40, cy: 205, w: 400 }, .8]
-  ];
-  if (hasG && !RM) {
-    const tl = gsap.timeline({ defaults: { ease: 'none' }, onUpdate: () => { camDraw(); const t = tl.time(); let i = 0; marks.forEach((m, k) => { if (t >= m - .22) i = k; }); setStop(i); } });
-    const marks = [];
-    K.forEach((k, i) => { tl.to(cam, { ...k[0], duration: i ? .55 : .7, ease: 'power2.inOut' }); marks.push(tl.duration()); tl.to(cam, { ...k[1], duration: k[2] }); });
-    tl.to(cam, { duration: .35 });
-    const place = () => { const span = tourEl.offsetHeight - innerHeight; anchors.forEach((a, i) => a.style.top = (marks[i] / tl.duration() * span + hdrH() + 4) + 'px'); };
-    place(); ScrollTrigger.create({ trigger: tourEl, start: 'top top', end: 'bottom bottom', scrub: .5, animation: tl, onRefresh: place });
-    camDraw(); setStop(0);
-  } else { cam.cx = 800; cam.cy = 470; cam.w = 1700; cam.p = 1; camDraw(); tourEl.style.height = 'auto'; $('.tour-stage').style.position = 'relative'; }
-  $$('.rail a').forEach(a => a.tabIndex = -1);
+  /* вентиляция: карточки идут за схемой, вкладка переключает узел */
+  const vcs = $$('.vc'), bars = $$('.vc-bar b');
+  scheme.onStage = i => vcs.forEach((c, k) => { c.classList.toggle('is-on', k === i); $('.vc-tab', c).setAttribute('aria-pressed', k === i ? 'true' : 'false'); });
+  scheme.onProg = (i, k) => bars.forEach((b, n) => { const v = n < i ? 1 : n === i ? k : 0; if (b._v !== v) { b._v = v; b.style.transform = `scaleX(${v.toFixed(3)})`; } });
+  scheme.onStage(scheme.stage); scheme.render();
+  vcs.forEach((c, i) => $('.vc-tab', c).addEventListener('click', () => scheme.go(i)));
+  const vAnch = ['zonty', 'vozduhovody', 'shahty', 'ventilyatory'].indexOf(location.hash.slice(1));
+  if (vAnch > 0) scheme.go(vAnch);
+
 
   if (hasG && !RM) {
     /* герой: интро */
@@ -441,11 +565,11 @@ function init() {
   /* фото тура и ленты «до/после» грузятся, когда блок подходит к экрану (не мешают первому экрану) */
   const setSrc = im => { if (!im.dataset.src) return; im.src = im.dataset.src; im.removeAttribute('data-src'); const sh = im.closest('.shot-img'); if (sh) sh.style.setProperty('--src', `url("${im.getAttribute('src')}")`); };
   const lio = new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting) return; $$('img[data-src]', e.target).forEach(setSrc); lio.unobserve(e.target); }), { rootMargin: '900px 0px' });
-  ['.tour-photos', '#strip'].forEach(sel => { const el = $(sel); if (el) lio.observe(el); });
+  ['.vnt-cards', '#strip'].forEach(sel => { const el = $(sel); if (el) lio.observe(el); });
 
   /* ДДД: активная услуга */
   const dwin = $('#dddScene'), dcards = $$('.dcard');
-  const setD = c => { dcards.forEach(x => x.classList.toggle('is-on', x === c)); dwin.dataset.on = c.dataset.k; };
+  const setD = c => { dcards.forEach(x => x.classList.toggle('is-on', x === c)); dwin.dataset.on = c.dataset.k; ddd.play(c.dataset.k); };
   dcards.forEach(c => { c.addEventListener('pointerenter', () => { if (matchMedia('(hover:hover)').matches) setD(c); }); c.addEventListener('click', () => setD(c)); c.addEventListener('focusin', () => setD(c));
     if (hasG) ScrollTrigger.create({ trigger: c, start: 'top 62%', end: 'bottom 62%', onToggle: s => { if (s.isActive) setD(c); } }); });
 
