@@ -190,24 +190,26 @@ function buildTract(host, key, id, par) {
 
 /* ================= схема вентиляции: узлы на одной линии, очистка идёт сама по кругу ================= */
 function buildScheme(host) {
-  const VW = 1200, VH = 400, ST = 3.6, HOLD = 1.8, BACK = 1, CYC = ST * 4 + HOLD + BACK;
-  let s = `<svg class="sc vs" viewBox="0 0 ${VW} ${VH}" preserveAspectRatio="xMidYMid meet">`;
+  const VB = "36 4 1124 392", VW = 1200, VH = 400, ST = 3.6, HOLD = 1.8, BACK = 1, CYC = ST * 4 + HOLD + BACK;
+  let s = `<svg class="sc vs" viewBox="${VB}" preserveAspectRatio="xMidYMid meet">`;
   /* монтажная сетка и размерные линии */
   s += `<path class="vs-dim" d="M60 382H1140M60 376v12M340 376v12M700 376v12M770 376v12M1140 376v12"/>`;
   /* узел 1: зонт */
   s += `<g class="vs-node" data-n="0"><path class="vs-ln" d="M50 300H350L262 228H138Z"/><path class="vs-ln" d="M175 228V190M225 228V190"/>`;
-  for (let i = 0; i < 9; i++) s += `<path class="vs-th" d="M${92 + i * 26} 294l18-56"/>`;
+  s += `<defs><clipPath id="vsHood"><path d="M52 298H348L261 230H139Z"/></clipPath></defs><g clip-path="url(#vsHood)">`;
+  for (let i = 0; i < 10; i++) s += `<path class="vs-th" d="M${70 + i * 28} 300l20-72"/>`;
+  s += `</g>`;
   s += `<path class="vs-th" d="M120 336h160M150 336v-14M200 336v-20M250 336v-14" style="opacity:.5"/></g>`;
   /* узел 2: воздуховод */
   s += `<g class="vs-node" data-n="1"><path class="vs-ln" d="M175 150H700M225 190H700M175 150V190"/>`;
   for (let x = 280; x < 700; x += 105) s += `<path class="vs-ln" d="M${x} 142v56" style="stroke-width:2"/>`;
   s += `</g>`;
   /* узел 3: шахта через перекрытия */
-  s += `<g class="vs-node" data-n="2"><path class="vs-ln" d="M700 100V150M700 190V330M770 60V330M700 60V60"/><path class="vs-ln" d="M700 60H770" style="opacity:0"/>`;
+  s += `<g class="vs-node" data-n="2"><path class="vs-ln" d="M700 60V150M700 190V330M770 100V330"/>`;
   [116, 246].forEach(y => s += `<rect class="vs-slab" x="640" y="${y}" width="190" height="12"/>`);
   s += `<path class="vs-ln" d="M690 334l10-8 12 10 12-10 12 10 12-10 12 10 10-8" style="stroke-width:2"/></g>`;
   /* выход и узел 4: вентилятор */
-  s += `<g class="vs-node" data-n="3"><path class="vs-ln" d="M700 60V100M700 60H900M770 100H900"/><rect class="vs-ln" x="900" y="14" width="160" height="132" rx="14"/><circle class="vs-ln" cx="980" cy="80" r="48"/><g class="vs-rotor" transform="translate(980 80)">`;
+  s += `<g class="vs-node" data-n="3"><path class="vs-ln" d="M700 60H900M770 100H900"/><rect class="vs-ln" x="900" y="14" width="160" height="132" rx="14"/><circle class="vs-ln" cx="980" cy="80" r="48"/><g class="vs-rotor" transform="translate(980 80)">`;
   for (let i = 0; i < 6; i++) s += `<path transform="rotate(${i * 60})" d="M0 0Q20-20 40-6L38 4Q20-6 0 0Z"/>`;
   s += `</g><circle cx="980" cy="80" r="6" class="vs-hub"/><path class="vs-ex" d="M1078 80h56m-12-10 12 10-12 10M1078 52h40m-10-8 10 8-10 8M1078 108h40m-10-8 10 8-10 8"/></g>`;
   /* поток воздуха по оси */
@@ -217,9 +219,14 @@ function buildScheme(host) {
   const dep = [];
   for (let i = 0; i < 8; i++) { const x = 84 + i * 30; dep.push([0, (x - 84) / 230, `<path class="vs-dep" d="M${x} 292l${16 + (i % 2) * 4}-50h10l-${12 + (i % 3) * 4} 50z"/>`]); }
   for (let x = 182; x < 696; x += 20) dep.push([1, (x - 182) / 514, `<rect class="vs-dep" x="${x}" y="${178 + (x % 3)}" width="18" height="${9 - (x % 3)}" rx="4"/>`, `<circle class="vs-dep" cx="${x + 9}" cy="${158}" r="${2 + (x % 4)}"/>`]);
-  for (let y = 318; y > 68; y -= 20) dep.push([2, (318 - y) / 250, `<rect class="vs-dep" x="703" y="${y}" width="${8 + (y % 3)}" height="16" rx="4"/><rect class="vs-dep" x="${759 - (y % 3)}" y="${y - 6}" width="${8 + (y % 3)}" height="16" rx="4"/>`]);
+  /* в шахте отложения только на стенках: проём воздуховода (150-190) слева и выход (60-100) справа пустые */
+  for (let y = 318; y > 64; y -= 20) {
+    const L = y > 194 || (y < 134 && y > 60) ? `<rect class="vs-dep" x="703" y="${y}" width="${8 + (y % 3)}" height="16" rx="4"/>` : '';
+    const R = y - 6 > 104 ? `<rect class="vs-dep" x="${759 - (y % 3)}" y="${y - 6}" width="${8 + (y % 3)}" height="16" rx="4"/>` : '';
+    if (L || R) dep.push([2, (318 - y) / 250, L + R]);
+  }
   for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2; dep.push([3, i / 10, `<circle class="vs-dep" cx="${(980 + Math.cos(a) * 36).toFixed(1)}" cy="${(80 + Math.sin(a) * 36).toFixed(1)}" r="${6 + (i % 3)}"/>`]); }
-  s += `<g class="vs-deps">` + dep.map((d, i) => `<g data-d="${i}">${d.slice(2).join('')}</g>`).join('') + `</g>`;
+  s += `<g class="vs-deps">` + dep.map((d, i) => `<g data-d="${i}"${d[0] === 0 ? ' clip-path="url(#vsHood)"' : ''}>${d.slice(2).join('')}</g>`).join('') + `</g>`;
   /* щётка */
   s += `<g class="vs-brush"><circle r="20" class="vs-glow"/><g class="vs-br">`;
   for (let i = 0; i < 12; i++) s += `<path transform="rotate(${i * 30})" d="M0 5V16"/>`;
@@ -262,7 +269,7 @@ function buildScheme(host) {
     if (host.clientWidth && host.clientWidth / Math.max(1, host.clientHeight) < 2.2) {
       const w = 640, cx = clamp(bx, w / 2, VW - w / 2); S.cam += (cx - S.cam) * .08;
       svg.setAttribute('viewBox', `${(S.cam - w / 2).toFixed(1)} 0 ${w} ${VH}`);
-    } else if (svg.getAttribute('viewBox') !== `0 0 ${VW} ${VH}`) svg.setAttribute('viewBox', `0 0 ${VW} ${VH}`);
+    } else if (svg.getAttribute('viewBox') !== VB) svg.setAttribute("viewBox", VB);
   };
   S.go = i => { S.t = i * ST + .001; S.render(); };
   S.tick = dt => {
@@ -474,7 +481,23 @@ function init() {
   /* герой: фронт очистки запускается кнопкой (без закрепления и без привязки к прокрутке) */
   const heroEl = $('.hero'), meter = $('.hero-meter i'), playBtn = $('.hero-play');
   const hs = { p: 0 };
-  function layoutHero() { if (RM) { hs.p = 1; heroRender(); } }
+  /* текст героя на компьютере: по вертикали - посередине неба между шапкой и крышей, по горизонтали - левее здания с шахтой */
+  const heroTxt = $('.hero-txt'), heroSc = $('#heroScene');
+  function placeHeroTxt() {
+    const st = heroTxt.style;
+    if (mqM.matches) { st.left = st.top = st.right = st.marginLeft = ''; return; }
+    const W = heroSc.clientWidth, H = heroSc.clientHeight, D = CFG.d, k = Math.min(W / D.W, H / D.H), ox = (W - D.W * k) / 2, oy = H - D.H * k;
+    const roof = oy + (D.R1 - 34) * k, bld = ox + (D.BX - 10) * k, hb = hdrH();
+    const pad = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--pad')) || 24;
+    const tw = heroTxt.offsetWidth, th = heroTxt.offsetHeight;
+    const cx = Math.min(W / 2, bld - 40 - tw / 2), left = Math.max(pad, cx - tw / 2);
+    const top = Math.max(hb + 8, (hb + roof) / 2 - th / 2);
+    st.right = 'auto'; st.marginLeft = '0'; st.left = left.toFixed(0) + 'px'; st.top = top.toFixed(0) + 'px';
+  }
+  function layoutHero() { placeHeroTxt(); if (RM) { hs.p = 1; heroRender(); } }
+  addEventListener('resize', placeHeroTxt);
+  document.addEventListener('langchange', placeHeroTxt);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeHeroTxt);
   const heroRender = () => { hero.render(hs.p); if (meter) meter.style.transform = `scaleX(${hs.p.toFixed(3)})`; };
   let playTw = null;
   const playLbl = done => $$('span[data-i18n]', playBtn).forEach((s, i) => { s.hidden = done ? i === 0 : i === 1; });
