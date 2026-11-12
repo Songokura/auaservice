@@ -190,107 +190,168 @@ function buildTract(host, key, id, par) {
 
 /* ================= схема вентиляции: одна труба с чистыми коленами, очистка идёт сама по кругу ================= */
 function buildScheme(host) {
-  const X0 = 60, X1 = 1140, VB = `${X0} 0 ${X1 - X0} 400`, VH = 400, ST = 3.6, HOLD = 1.8, BACK = 1, CYC = ST * 4 + HOLD + BACK;
-  /* геометрия: труба шириной 40 */
-  const NL = 260, NR = 300, DT = 222, DB = 262, SL = 842, SR = 882, ROOF = 120, HT = 298, HB = 350;
-  const HOOD = `M140 ${HB}H420L330 ${HT}H230Z`;
-  let s = `<svg class="sc vs" viewBox="${VB}" preserveAspectRatio="xMidYMid meet"><defs>`;
-  s += `<clipPath id="vsHood"><path d="${HOOD}"/></clipPath>`;
-  s += `<clipPath id="vsC0"><rect data-c="0" x="140" y="290" width="290" height="70"/></clipPath>`;
-  s += `<clipPath id="vsC1"><rect data-c="1" x="${NL}" y="${DT}" width="${SR - NL}" height="${DB - DT}"/></clipPath>`;
-  s += `<clipPath id="vsC2"><rect data-c="2" x="${SL}" y="${ROOF}" width="${SR - SL}" height="${DB - ROOF}"/></clipPath></defs>`;
-  /* перекрытие и кровля, через них проходит шахта */
-  s += `<rect class="vs-slab" x="90" y="196" width="${SL - 90}" height="12"/><rect class="vs-slab" x="${SR}" y="196" width="${1100 - SR}" height="12"/>`;
-  s += `<rect class="vs-slab" x="680" y="${ROOF}" width="${SL - 680}" height="12"/><rect class="vs-slab" x="${SR}" y="${ROOF}" width="${1100 - SR}" height="12"/>`;
-  /* тело трубы */
-  s += `<path class="vs-body" d="M${NL} ${HT}V${DT}H${SL}V${ROOF}H${SR}V${DB}H${NR}V${HT}Z"/>`;
-  /* отложения: слой жира внутри трубы, стирается за щёткой */
-  s += `<g clip-path="url(#vsC0)"><g clip-path="url(#vsHood)"><path class="vs-dep" d="M150 ${HB - 4}H410L326 ${HT + 6}H234Z" style="opacity:.55"/>`;
-  for (let i = 0; i < 11; i++) s += `<path class="vs-dep" d="M${150 + i * 26} ${HB - 2}l22-54h7l-22 54z"/>`;
-  s += `</g></g><g clip-path="url(#vsC1)"><path class="vs-dep" d="M${NL + 2} ${DB - 9}H${SR - 4}" style="stroke:var(--ochre);stroke-width:10;stroke-linecap:round;fill:none"/><path d="M${NL + 2} ${DT + 6}H${SL - 4}" style="stroke:var(--ochre);stroke-width:5;stroke-linecap:round;fill:none;opacity:.8"/>`;
-  for (let x = NL + 24; x < SL - 10; x += 46) s += `<circle class="vs-dep" cx="${x}" cy="${DB - 15}" r="${5 + (x % 3)}"/>`;
-  s += `</g><g clip-path="url(#vsC2)"><path d="M${SL + 6} ${DT - 2}V${ROOF + 4}M${SR - 6} ${DB - 4}V${ROOF + 4}" style="stroke:var(--ochre);stroke-width:8;stroke-linecap:round;fill:none"/>`;
-  for (let y = ROOF + 18; y < DT - 6; y += 30) s += `<circle class="vs-dep" cx="${SL + 9}" cy="${y}" r="5"/><circle class="vs-dep" cx="${SR - 9}" cy="${y + 15}" r="5"/>`;
-  s += `</g>`;
-  /* узел 1: зонт и подъём */
-  s += `<g class="vs-node" data-n="0"><g clip-path="url(#vsHood)">`;
-  for (let i = 0; i < 11; i++) s += `<path class="vs-th" d="M${150 + i * 26} ${HB}l22-54"/>`;
-  s += `</g><path class="vs-ln" d="${HOOD}"/><path class="vs-ln" d="M132 ${HB}H428" style="stroke-width:5"/><path class="vs-ln" d="M${NL} ${HT}V${DT}M${NR} ${HT}V${DB}"/></g>`;
-  /* узел 2: воздуховод под перекрытием, фланцы */
-  s += `<g class="vs-node" data-n="1"><path class="vs-ln" d="M${NL} ${DT}H${SL}M${NR} ${DB}H${SR}"/>`;
-  for (let x = 400; x < SL; x += 110) s += `<path class="vs-ln" d="M${x} ${DT - 6}V${DB + 6}" style="stroke-width:2"/>`;
-  s += `</g>`;
-  /* узел 3: шахта через перекрытие и кровлю */
-  s += `<g class="vs-node" data-n="2"><path class="vs-ln" d="M${SL} ${DT}V${ROOF}M${SR} ${DB}V${ROOF}"/></g>`;
-  /* узел 4: вентилятор на шахте, выброс вверх */
-  const FX = (SL + SR) / 2, FY = 78;
-  s += `<g class="vs-node" data-n="3"><rect class="vs-ln vs-case" x="${FX - 72}" y="36" width="144" height="${ROOF - 36}" rx="12"/><circle class="vs-ln" cx="${FX}" cy="${FY}" r="32"/><g class="vs-rotor" transform="translate(${FX} ${FY})">`;
-  for (let i = 0; i < 6; i++) s += `<path transform="rotate(${i * 60})" d="M0 0Q14-14 27-4L26 3Q14-4 0 0Z"/>`;
-  s += `</g><circle cx="${FX}" cy="${FY}" r="5" class="vs-hub"/><path class="vs-ex" d="M${FX - 34} 28V4m-7 8 7-8 7 8M${FX} 28V0m-7 8 7-8 7 8M${FX + 34} 28V4m-7 8 7-8 7 8"/></g>`;
-  /* поток воздуха по оси трубы */
-  const CX = (NL + NR) / 2, CY = (DT + DB) / 2;
-  const AIR = [`M${CX} ${HB - 14}V${CY}`, `M${CX} ${CY}H${FX}`, `M${FX} ${CY}V${ROOF}`, `M${FX} ${ROOF}V${FY + 34}`];
-  AIR.forEach((d, i) => s += `<path class="vs-air" data-a="${i}" d="${d}"/>`);
-  /* отложения на крыльчатке */
-  const FD = [];
-  for (let i = 0; i < 9; i++) { const a = i / 9 * Math.PI * 2; FD.push(`<circle class="vs-dep" data-f="${i}" cx="${(FX + Math.cos(a) * 24).toFixed(1)}" cy="${(FY + Math.sin(a) * 24).toFixed(1)}" r="${4.5 + (i % 3)}"/>`); }
-  s += FD.join('');
-  /* щётка */
-  s += `<g class="vs-brush"><circle r="18" class="vs-glow"/><g class="vs-br">`;
-  for (let i = 0; i < 12; i++) s += `<path transform="rotate(${i * 30})" d="M0 5V14"/>`;
-  s += `</g><circle r="5" class="vs-hub2"/></g>`;
-  /* подписи узлов */
-  [['sc.hood', 'Зонт и фильтры', 280, 388, 'middle'], ['sc.duct', 'Воздуховоды', 571, 296, 'middle'], ['sc.shaft', 'Шахта', SR + 20, 172, 'start'], ['sc.fan', 'Вентилятор', FX + 92, 84, 'start']]
-    .forEach((l, i) => s += `<text class="vs-lbl" data-l="${i}" x="${l[2]}" y="${l[3]}" text-anchor="${l[4]}" data-i18n="${l[0]}">${l[1]}</text>`);
-  host.innerHTML = s + '</svg>';
-
-  const svg = $('svg', host), q = sel => $$(sel, host);
-  const clips = q('[data-c]'), fdeps = q('[data-f]'), nodes = q('.vs-node'), airs = q('.vs-air'), lbls = q('.vs-lbl'), brush = $('.vs-brush', host), br = $('.vs-br', host), rotor = $('.vs-rotor', host);
-  const PATH = [[[184, 326], [376, 326]], [[CX, CY], [FX - 2, CY]], [[FX, CY], [FX, ROOF + 6]], [[FX, ROOF + 4], [FX, FY]]];
-  const S = { host, active: true, t: 0, auto: !RM, ang: 0, spin: 0, cam: 600, onStage: null, stage: -1 };
-  const setClip = (i, f) => {
-    const r = clips[i]; f = clamp(f);
-    if (i === 0) { r.setAttribute('x', 140 + 290 * f); r.setAttribute('width', 290 * (1 - f)); }
-    else if (i === 1) { const x = NL + (SR - NL) * f; r.setAttribute('x', x); r.setAttribute('width', SR - x); }
-    else { const h = (DB - ROOF) * (1 - f); r.setAttribute('height', h); }
-  };
+  /* четыре крупных плана: у каждого узла свой ракурс и свой способ очистки */
+  const ST = 4.6, HOLD = 1.8, BACK = 1, CYC = ST * 4 + HOLD + BACK;
+  const io = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  const LB = [['sc.hood', 'Зонт и фильтры'], ['sc.duct', 'Воздуховоды'], ['sc.shaft', 'Шахта'], ['sc.fan', 'Вентилятор']];
+  host.innerHTML = LB.map((l, i) => `<div class="vp" data-i="${i}"><span class="vp-l" data-i18n="${l[0]}">${l[1]}</span><svg class="sc vps" viewBox="0 0 500 440" preserveAspectRatio="xMidYMid meet"></svg></div>`).join('');
+  const panes = $$('.vp', host), svgs = panes.map(p => $('svg', p));
+  const P = [vpHood, vpDuct, vpShaft, vpFan].map((f, i) => f(svgs[i]));
+  const S = { host, active: true, t: 0, auto: !RM, onStage: null, onProg: null, stage: -1 };
   S.render = () => {
     const t = S.t; let stage = Math.min(3, Math.floor(t / ST)), k = clamp((t - stage * ST) / ST);
-    const back = t > ST * 4 + HOLD ? clamp((t - ST * 4 - HOLD) / BACK) : 0;
-    const end = t >= ST * 4; if (end) { stage = 3; k = 1; }
-    const mv = clamp(k / .82), e = mv < .5 ? 2 * mv * mv : 1 - Math.pow(-2 * mv + 2, 2) / 2;
-    const [[x1, y1], [x2, y2]] = PATH[stage], g = stage === 3 ? clamp(e / .4) : e;
-    const bx = lerp(x1, x2, g), by = lerp(y1, y2, g);
-    brush.setAttribute('transform', `translate(${bx.toFixed(1)} ${by.toFixed(1)})`);
-    brush.style.opacity = end ? Math.max(0, 1 - (t - ST * 4) / .5) : (k > .96 && stage < 3 ? 0 : 1);
-    /* очищенная доля каждого узла; в конце круга жир нарастает обратно */
-    const fr = i => end ? 1 - back : i < stage ? 1 : i > stage ? 0 : i === 0 ? clamp((bx - 184) / 192) : i === 1 ? clamp((bx - NL) / (SR - NL)) : i === 2 ? clamp((DB - by) / (DB - ROOF)) : clamp((e - .4) / .6);
-    for (let i = 0; i < 3; i++) setClip(i, fr(i));
-    const f3 = fr(3); fdeps.forEach((c, i) => { const o = f3 > (i + .5) / 9 ? 0 : 1; if (c._o !== o) { c._o = o; c.style.opacity = o; } });
-    const done = i => end ? back < .5 : i < stage || (i === stage && k >= .82);
-    nodes.forEach((n, i) => { n.classList.toggle('is-on', i === stage && !end); n.classList.toggle('is-clean', done(i)); });
-    lbls.forEach((n, i) => n.classList.toggle('is-on', i === stage && !end));
-    airs.forEach((a, i) => a.classList.toggle('is-clean', done(i)));
-    S.spin = done(3) ? 1 : .08;
+    const end = t >= ST * 4, back = t > ST * 4 + HOLD ? clamp((t - ST * 4 - HOLD) / BACK) : 0;
+    if (end) { stage = 3; k = 1; }
+    P.forEach((p, i) => { const f = end ? (back > .5 ? 0 : 1) : i < stage ? 1 : i > stage ? 0 : k; p.set(f, i === stage && !end); svgs[i].classList.toggle('is-clean', f >= 1); });
+    panes.forEach((p, i) => p.classList.toggle('is-on', i === stage));
     if (stage !== S.stage) { S.stage = stage; if (S.onStage) S.onStage(stage); }
     if (S.onProg) S.onProg(stage, end ? 1 : k);
-    /* узкий экран: окно схемы идёт за щёткой */
-    if (host.clientWidth && host.clientWidth / Math.max(1, host.clientHeight) < 2.2) {
-      const w = 640, cx = clamp(bx, X0 + w / 2, X1 - w / 2); S.cam += (cx - S.cam) * .08;
-      svg.setAttribute('viewBox', `${(S.cam - w / 2).toFixed(1)} 0 ${w} ${VH}`);
-    } else if (svg.getAttribute('viewBox') !== VB) svg.setAttribute('viewBox', VB);
   };
   S.go = i => { S.t = i * ST + .001; S.render(); };
-  S.tick = dt => {
-    if (!S.active) return;
-    if (S.auto) S.t = (S.t + dt) % CYC;
-    S.ang = (S.ang + dt * lerp(40, 620, S.spin)) % 360; rotor.setAttribute('transform', `translate(${FX} ${FY}) rotate(${S.ang.toFixed(1)})`);
-    br.setAttribute('transform', `rotate(${(S.ang * 2.4 % 360).toFixed(1)})`);
-    S.render();
-  };
+  S.tick = dt => { if (!S.active) return; if (S.auto) S.t = (S.t + dt) % CYC; P.forEach(p => p.tick(dt)); S.render(); };
+  panes.forEach((p, i) => p.addEventListener('click', () => S.go(i)));
   if (RM) S.t = ST * 4 + .01;
   S.render();
   return S;
+
+  /* 1. зонт спереди: кассетные фильтры по очереди выходят на мойку */
+  function vpHood(svg) {
+    const FX = [55, 190, 325], FY = 142, FW = 120, FH = 96, DROP = 168;
+    let s = `<defs>${FX.map((x, j) => `<clipPath id="vhC${j}"><rect data-c x="0" y="0" width="${FW}" height="${FH}"/></clipPath>`).join('')}</defs>`;
+    s += `<path class="ln" d="M215 0V40M285 0V40"/><path class="ln fillk" d="M168 40H332L462 128H38Z"/><rect class="ln fillk" x="38" y="128" width="424" height="122" rx="4"/>`;
+    FX.forEach(x => s += `<rect class="dk" x="${x}" y="${FY}" width="${FW}" height="${FH}" rx="4"/>`);
+    s += `<rect class="tray" x="40" y="414" width="420" height="14" rx="3"/><rect class="dep tray-l" x="44" y="424" width="412" height="0"/>`;
+    FX.forEach((x, j) => {
+      s += `<g class="vh-f" data-j="${j}"><rect class="fillk" x="0" y="0" width="${FW}" height="${FH}" rx="4"/>`;
+      for (let b = 12; b < FW; b += 12) s += `<path class="th" d="M${b} 6l-5 14 5 14-5 14 5 14-5 14 5 14"/>`;
+      s += `<g clip-path="url(#vhC${j})"><rect class="dep" x="3" y="3" width="${FW - 6}" height="${FH - 6}" rx="3" style="opacity:.82"/>`;
+      for (let b = 0; b < 7; b++) s += `<circle class="dep" cx="${10 + b * 17}" cy="${FH - 6 - (b % 3) * 4}" r="${5 + (b % 2) * 2}"/>`;
+      s += `</g><rect class="ln vh-fr" x="0" y="0" width="${FW}" height="${FH}" rx="4"/></g>`;
+    });
+    s += `<g class="vh-noz"><path class="ln" d="M0 -18V0"/><rect class="or" x="-16" y="0" width="32" height="9" rx="3"/><path class="spray" d="M-14 10L-40 46H40L14 10Z"/></g>`;
+    s += `<g class="vh-drips">${[0, 1, 2, 3].map(d => `<circle class="dep" r="3.5" cx="0" cy="0"/>`).join('')}</g>`;
+    svg.innerHTML = s;
+    const fs = $$('.vh-f', svg), cl = $$('[data-c]', svg), noz = $('.vh-noz', svg), drips = $$('.vh-drips circle', svg), lvl = $('.tray-l', svg);
+    let T = 0;
+    return {
+      tick: dt => { T += dt; },
+      set(f) {
+        let act = -1, ax = 0, ay = 0, wash = 0;
+        fs.forEach((g, j) => {
+          const u = clamp(f * 3 - j), w = clamp((u - .2) / .6);
+          const ty = u <= 0 || u >= 1 ? 0 : u < .2 ? io(u / .2) * DROP : u > .8 ? (1 - io((u - .8) / .2)) * DROP : DROP;
+          g.setAttribute('transform', `translate(${FX[j]} ${(FY + ty).toFixed(1)})`);
+          cl[j].setAttribute('y', (FH * w).toFixed(1)); cl[j].setAttribute('height', (FH * (1 - w)).toFixed(1));
+          g.classList.toggle('is-clean', u >= 1 || w >= 1);
+          if (u > .2 && u < .8) { act = j; ax = FX[j]; ay = FY + ty; wash = w; }
+        });
+        noz.style.opacity = act < 0 ? 0 : 1;
+        if (act >= 0) {
+          noz.setAttribute('transform', `translate(${(ax + FW / 2 + Math.sin(T * 9) * 34).toFixed(1)} ${ay - 46})`);
+          drips.forEach((d, i) => { const ph = (T * 1.6 + i / drips.length) % 1; d.setAttribute('cx', (ax + 18 + i * 26).toFixed(0)); d.setAttribute('cy', (ay + FH + ph * (414 - ay - FH)).toFixed(1)); d.style.opacity = 1; });
+        } else drips.forEach(d => d.style.opacity = 0);
+        lvl.setAttribute('y', (424 - 8 * f).toFixed(1)); lvl.setAttribute('height', (8 * f).toFixed(1));
+      }
+    };
+  }
+
+  /* 2. воздуховод изнутри, вид вдоль трубы: щётка идёт из глубины к зрителю */
+  function vpDuct(svg) {
+    const CX = 250, CY = 220, HW = 232, HH = 196, N = 9, sc = d => 1 / (1 + d * 7);
+    const R = d => { const s = sc(d); return [CX - HW * s, CY - HH * s, CX + HW * s, CY + HH * s]; };
+    let s = `<rect class="vd-end" x="${CX - HW * sc(1)}" y="${CY - HH * sc(1)}" width="${2 * HW * sc(1)}" height="${2 * HH * sc(1)}"/>`;
+    for (let j = 0; j < N; j++) {
+      const a = R(j / N), b = R((j + 1) / N), dm = (j + .5) / N;
+      s += `<path class="ln wall" d="M${a[0]} ${a[1]}L${b[0]} ${b[1]}M${a[2]} ${a[1]}L${b[2]} ${b[1]}M${a[0]} ${a[3]}L${b[0]} ${b[3]}M${a[2]} ${a[3]}L${b[2]} ${b[3]}"/>`;
+      const fl = (a[3] - b[3]) * .5;
+      s += `<g class="vd-dep fade" data-d="${dm}"><path class="dep" d="M${a[0]} ${a[3]}L${a[2]} ${a[3]}L${b[2]} ${b[3]}L${b[0]} ${b[3]}Z" style="opacity:.9"/>`;
+      s += `<path class="dep" d="M${a[0]} ${a[1]}L${a[2]} ${a[1]}L${b[2]} ${b[1]}L${b[0]} ${b[1]}Z" style="opacity:.35"/>`;
+      s += `<path class="dep" d="M${a[0]} ${a[3]}L${a[0]} ${a[3] - fl}L${b[0]} ${b[3] - fl * .6}L${b[0]} ${b[3]}Z" style="opacity:.6"/><path class="dep" d="M${a[2]} ${a[3]}L${a[2]} ${a[3] - fl}L${b[2]} ${b[3] - fl * .6}L${b[2]} ${b[3]}Z" style="opacity:.6"/>`;
+      const s1 = sc(j / N); for (let q = 0; q < 3; q++) s += `<circle class="dep" cx="${(CX + (q - 1) * 120 * s1).toFixed(1)}" cy="${(CY + HH * s1 - 12 * s1).toFixed(1)}" r="${(14 * s1).toFixed(1)}"/>`;
+      s += `</g>`;
+    }
+    for (let j = 1; j <= N; j++) { const a = R(j / N); s += `<rect class="ln" x="${a[0]}" y="${a[1]}" width="${a[2] - a[0]}" height="${a[3] - a[1]}" style="stroke-width:${(3 * sc(j / N) + .8).toFixed(2)}"/>`; }
+    s += `<rect class="ln" x="${CX - HW}" y="${CY - HH}" width="${2 * HW}" height="${2 * HH}" style="stroke-width:5"/>`;
+    s += `<g class="air">` + [[-1, -1], [1, -1], [-1, 1], [1, 1], [0, -1], [0, 1]].map(([dx, dy]) => `<path d="M${CX + dx * 20} ${CY + dy * 16}L${CX + dx * 150} ${CY + dy * 120}"/>`).join('') + `</g>`;
+    s += `<g class="vd-br"><circle r="168" class="glow"/><g class="vd-rot">`;
+    for (let i = 0; i < 28; i++) s += `<path transform="rotate(${i * 360 / 28})" d="M0 26V164" class="bristle"/>`;
+    s += `</g><circle r="26" class="or"/><circle r="9" class="hubk"/></g>`;
+    svg.innerHTML = s;
+    const deps = $$('.vd-dep', svg), br = $('.vd-br', svg), rot = $('.vd-rot', svg); let ang = 0;
+    return {
+      tick: dt => { ang = (ang + dt * 520) % 360; rot.setAttribute('transform', `rotate(${ang.toFixed(1)})`); },
+      set(f, on) {
+        const g = io(clamp(f / .9)), db = 1 - g;
+        deps.forEach(d => { const o = f >= 1 || +d.dataset.d > db ? 0 : 1; if (d._o !== o) { d._o = o; d.style.opacity = o; } });
+        const s1 = sc(db) * .98; br.setAttribute('transform', `translate(${CX} ${CY}) scale(${s1.toFixed(3)})`);
+        br.style.opacity = on && f > 0 ? (f < .9 ? 1 : 1 - (f - .9) / .1) : 0;
+      }
+    };
+  }
+
+  /* 3. шахта по высоте здания: щётка на лебёдке с кровли, мусор уходит в сборник */
+  function vpShaft(svg) {
+    const L = 190, Rr = 310, TOP = 78, BOT = 404;
+    let s = `<defs><clipPath id="vsh"><rect data-c x="${L}" y="${TOP}" width="${Rr - L}" height="${BOT - TOP}"/></clipPath></defs>`;
+    [158, 238, 318].forEach(y => s += `<rect class="slab" x="16" y="${y}" width="${L - 16}" height="8"/><rect class="slab" x="${Rr}" y="${y}" width="${468 - Rr}" height="8"/>`);
+    s += `<rect class="slab" x="16" y="${TOP - 12}" width="${L - 16}" height="12"/><rect class="slab" x="${Rr}" y="${TOP - 12}" width="${468 - Rr}" height="12"/>`;
+    s += `<rect class="fillk" x="${L}" y="${TOP}" width="${Rr - L}" height="${BOT - TOP}"/>`;
+    s += `<g clip-path="url(#vsh)"><rect class="dep" x="${L + 2}" y="${TOP}" width="12" height="${BOT - TOP}"/><rect class="dep" x="${Rr - 14}" y="${TOP}" width="12" height="${BOT - TOP}"/>`;
+    for (let y = TOP + 14; y < BOT; y += 22) s += `<circle class="dep" cx="${L + 15}" cy="${y}" r="${5 + (y % 3)}"/><circle class="dep" cx="${Rr - 15}" cy="${y + 11}" r="${5 + (y % 2) * 2}"/>`;
+    s += `</g><path class="ln" d="M${L} ${TOP - 12}V${BOT}H${Rr}V${TOP - 12}"/>`;
+    s += `<path class="ln" d="M${Rr} ${BOT - 34}H342Q356 ${BOT - 34} 356 ${BOT - 20}V${BOT - 4}"/><path class="ln" d="M${Rr} ${BOT - 14}H336V${BOT - 4}"/>`;
+    s += `<rect class="ln fillk" x="330" y="${BOT - 4}" width="134" height="32" rx="6"/><rect class="dep vsh-bin" x="336" y="${BOT + 22}" width="122" height="0"/>`;
+    s += `<path class="ln" d="M204 ${TOP - 12}L250 18L296 ${TOP - 12}"/><g transform="translate(250 30)"><circle class="ln fillk" r="15"/><g class="vsh-drum"><path class="th" d="M-15 0H15M0 -15V15"/></g></g>`;
+    s += `<path class="vsh-cab" d="M250 45V${TOP}"/>`;
+    s += `<g class="vsh-deb">${[0, 1, 2, 3, 4, 5, 6].map(() => '<circle class="dep" r="3"/>').join('')}</g>`;
+    s += `<g class="vsh-br"><ellipse class="glow" rx="68" ry="22"/><g class="vsh-bs">`;
+    for (let x = -52; x <= 52; x += 7) s += `<path class="bristle" d="M${x} -11V11"/>`;
+    s += `</g><rect class="or" x="-54" y="-3" width="108" height="6" rx="3"/></g>`;
+    svg.innerHTML = s;
+    const clip = $('[data-c]', svg), br = $('.vsh-br', svg), bs = $('.vsh-bs', svg), cab = $('.vsh-cab', svg), drum = $('.vsh-drum', svg), bin = $('.vsh-bin', svg), deb = $$('.vsh-deb circle', svg);
+    let T = 0, by = TOP + 10, on = false;
+    return {
+      tick: dt => { T += dt; if (on) drum.setAttribute('transform', `rotate(${(T * 300 % 360).toFixed(1)})`); bs.setAttribute('transform', `translate(${(Math.sin(T * 40) * 2.5).toFixed(2)} 0)`); },
+      set(f, o) {
+        on = o; by = lerp(TOP + 10, BOT - 12, io(clamp(f / .9)));
+        clip.setAttribute('y', by.toFixed(1)); clip.setAttribute('height', Math.max(0, BOT - by).toFixed(1));
+        if (f >= 1) clip.setAttribute('height', 0);
+        br.setAttribute('transform', `translate(250 ${by.toFixed(1)})`); br.style.opacity = o && f > 0 ? 1 : 0;
+        cab.setAttribute('d', `M250 45V${(o && f > 0 ? by : TOP - 12).toFixed(1)}`);
+        deb.forEach((d, i) => { const ph = (T * 1.3 + i / deb.length) % 1; d.setAttribute('cx', 214 + (i * 17) % 72); d.setAttribute('cy', (by + 14 + ph * (BOT - by - 14)).toFixed(1)); d.style.opacity = o && f > 0 && f < .95 ? 1 - ph * .6 : 0; });
+        bin.setAttribute('y', (BOT + 22 - 18 * f).toFixed(1)); bin.setAttribute('height', (18 * f).toFixed(1));
+      }
+    };
+  }
+
+  /* 4. вентилятор спереди: улитка и рабочее колесо, лопатки чистятся по одной, потом разгон */
+  function vpFan(svg) {
+    const CX = 236, CY = 236, NB = 12, NA = 45;
+    const sp = []; for (let a = 0; a <= 330; a += 6) { const r = 150 + 44 * a / 330, t = a * Math.PI / 180; sp.push(`${(CX + r * Math.sin(t)).toFixed(1)} ${(CY - r * Math.cos(t)).toFixed(1)}`); }
+    const e = sp[sp.length - 1].split(' ');
+    let s = `<path class="ln fillk" d="M${CX} 20V${CY - 150}L${sp.join('L')}L${e[0]} 20Z"/>`;
+    s += `<g class="air">${[0, 1, 2].map(i => `<path d="M${(+e[0] + 18 + i * 30).toFixed(0)} 96V0"/>`).join('')}</g>`;
+    s += `<g class="vf-imp"><circle class="ln" r="122"/>`;
+    for (let i = 0; i < NB; i++) s += `<g transform="rotate(${i * 360 / NB})"><path class="blade" d="M0 -38Q30 -78 14 -118"/><g class="vf-dep fade" data-b="${i}"><circle class="dep" cx="10" cy="-62" r="7"/><circle class="dep" cx="18" cy="-86" r="6"/><circle class="dep" cx="15" cy="-108" r="5"/></g></g>`;
+    s += `<circle class="ln fillk" r="36"/><circle class="or" r="8"/></g>`;
+    const nx = CX + 164 * Math.sin(NA * Math.PI / 180), ny = CY - 164 * Math.cos(NA * Math.PI / 180);
+    s += `<g class="vf-noz" transform="translate(${nx.toFixed(1)} ${ny.toFixed(1)}) rotate(${NA})"><path class="spray" d="M-6 14L-24 52H24L6 14Z"/><rect class="or" x="-7" y="-14" width="14" height="28" rx="4"/></g>`;
+    s += `<g transform="translate(424 384)"><path class="th" d="M-38 0A38 38 0 0 1 38 0"/><path class="ors" d="M10 -36A38 38 0 0 1 38 0"/><path class="vf-nd ln" d="M0 0V-30"/><circle class="or" r="5"/></g>`;
+    svg.innerHTML = s;
+    const imp = $('.vf-imp', svg), deps = $$('.vf-dep', svg), noz = $('.vf-noz', svg), nd = $('.vf-nd', svg);
+    let ang = 0, F = 0, spin = 0;
+    return {
+      tick: dt => { if (F >= .7) { spin = Math.min(1, spin + dt * .8); ang = (ang + dt * lerp(60, 900, spin)) % 360; } else spin = Math.max(0, spin - dt); },
+      set(f, o) {
+        F = f; const c = f < .7 ? f / .7 : 1, a = f < .7 ? c * 360 : ang;
+        if (f < .7) ang = a % 360;
+        imp.setAttribute('transform', `translate(${CX} ${CY}) rotate(${a.toFixed(1)})`);
+        deps.forEach(d => { const b = +d.dataset.b, need = (((NA - b * 30) % 360) + 360) % 360 || 360, o2 = f >= .7 || c * 360 >= need ? 0 : 1; if (d._o !== o2) { d._o = o2; d.style.opacity = o2; } });
+        noz.style.opacity = o && f > 0 && f < .7 ? 1 : .25;
+        nd.setAttribute('transform', `rotate(${(-80 + 170 * (f >= 1 ? 1 : spin)).toFixed(1)})`);
+      }
+    };
+  }
 }
 /* ================= сцена ДДД ================= */
 function buildDDD(host) {
@@ -441,7 +502,7 @@ function init() {
   if (page) {
     const mkHero = () => {
       const key = mqM.matches ? 'm' : 'd'; if (key === heroKey) return; heroKey = key;
-      const old = hero; hero = buildTract($('#heroScene'), key, 'h', key === 'm' ? 'xMidYMax slice' : 'xMidYMax meet');
+      const old = hero; hero = buildTract($('#heroScene'), key, 'h', key === 'm' ? 'xMidYMax slice' : 'xMaxYMax meet');
       if (old) { scenes.splice(scenes.indexOf(old), 1); hero.render(old.p); } scenes.push(hero);
     };
     mkHero();
@@ -493,12 +554,15 @@ function init() {
   const heroTxt = $('.hero-txt'), heroSc = $('#heroScene');
   function placeHeroTxt() {
     const st = heroTxt.style;
-    if (mqM.matches) { st.left = st.top = st.right = st.marginLeft = ''; return; }
-    const W = heroSc.clientWidth, H = heroSc.clientHeight, D = CFG.d, k = Math.min(W / D.W, H / D.H), ox = (W - D.W * k) / 2, oy = H - D.H * k;
+    if (mqM.matches) { st.left = st.top = st.right = st.marginLeft = st.width = ''; return; }
+    const W = heroSc.clientWidth, H = heroSc.clientHeight, D = CFG.d, k = Math.min(W / D.W, H / D.H), ox = W - D.W * k, oy = H - D.H * k;
     const roof = oy + (D.R1 - 34) * k, bld = ox + (D.BX - 10) * k, hb = hdrH();
     const pad = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--pad')) || 24;
-    const tw = heroTxt.offsetWidth, th = heroTxt.offsetHeight;
-    const cx = Math.min(W / 2, bld - 40 - tw / 2), left = Math.max(pad, cx - tw / 2);
+    /* текст строго по центру экрана; не влезает до здания - колонка уже, сдвиг только если совсем тесно */
+    st.width = ''; let tw = heroTxt.offsetWidth; const half = bld - 48 - W / 2;
+    if (half * 2 >= 520 && tw > half * 2) { tw = Math.floor(half * 2); st.width = tw + 'px'; }
+    const th = heroTxt.offsetHeight;
+    const cx = half * 2 >= 520 ? W / 2 : Math.min(W / 2, bld - 40 - tw / 2), left = Math.max(pad, cx - tw / 2);
     const top = Math.max(hb + 8, (hb + roof) / 2 - th / 2);
     st.right = 'auto'; st.marginLeft = '0'; st.left = left.toFixed(0) + 'px'; st.top = top.toFixed(0) + 'px';
   }

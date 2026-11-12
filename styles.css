@@ -198,8 +198,8 @@ h1{font-size:clamp(30px,min(4.05vw,6.5vh),72px)}
 .cl-duct::after{right:0;background:linear-gradient(-90deg,#fff,transparent)}
 .cl-track{display:flex;width:max-content;border-block:1px solid var(--line2);will-change:transform}
 .cl-set{display:flex;align-items:center;gap:clamp(34px,5vw,76px);padding:14px clamp(17px,2.5vw,38px);flex:none}
-.cl{display:grid;place-items:center;height:58px;flex:none}
-.cl img{height:100%;width:auto;max-width:170px;object-fit:contain}
+.cl{display:flex;align-items:center;justify-content:center;height:58px;flex:none}
+.cl img{height:58px;width:auto;max-width:170px;object-fit:contain}
 .cl-txt{font:700 24px/1 var(--disp);letter-spacing:-.02em;white-space:nowrap;color:var(--ink)}
 
 /* ============ вентиляция: тур ============ */
@@ -209,29 +209,40 @@ h1{font-size:clamp(30px,min(4.05vw,6.5vh),72px)}
 .tour-a{position:absolute;left:0;top:0;width:1px;height:1px}
 .vnt-board{position:relative;aspect-ratio:3/1;border-radius:22px;overflow:hidden;background:radial-gradient(70% 90% at 80% 0%,rgba(31,110,134,.45),transparent 70%),var(--ink2);box-shadow:0 40px 70px -50px rgba(15,46,59,.7)}
 .vnt-board::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(233,241,243,.06) 1px,transparent 1px) 0 0/40px 40px,linear-gradient(90deg,rgba(233,241,243,.06) 1px,transparent 1px) 0 0/40px 40px}
-.vnt-scheme{position:absolute;inset:3% 4%}
-.vnt-scheme svg{width:100%;height:100%;overflow:visible}
-.vs .vs-ln{fill:none;stroke:#CFE0E5;stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round;transition:stroke .5s var(--ease)}
-.vs .vs-th{fill:none;stroke:#7FA3AE;stroke-width:2;stroke-linecap:round}
-.vs .vs-slab{fill:rgba(169,192,200,.14);stroke:rgba(169,192,200,.45);stroke-width:1.2}
-.vs .vs-node.is-clean .vs-ln{stroke:var(--teal2)}
-.vs .vs-node.is-on .vs-ln{stroke:var(--orange)}
-.vs .vs-rotor path{fill:#CFE0E5}
-.vs .vs-node.is-clean .vs-rotor path{fill:var(--teal2)}
-.vs .vs-hub{fill:var(--ink2);stroke:#CFE0E5;stroke-width:2}
-.vs .vs-ex{fill:none;stroke:var(--teal2);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:.15;transition:opacity .6s var(--ease)}
-.vs .vs-node.is-clean .vs-ex{opacity:1;animation:vsEx 1.1s ease-in-out infinite}
-@keyframes vsEx{50%{transform:translateX(8px)}}
-.vs .vs-air{fill:none;stroke:var(--teal2);stroke-width:3;stroke-dasharray:6 18;stroke-linecap:round;opacity:.1;animation:vsAir .9s linear infinite;transition:opacity .6s var(--ease)}
-.vs .vs-air.is-clean{opacity:.95}
+.vnt-scheme{position:absolute;inset:clamp(12px,1.6vw,26px);display:flex;gap:clamp(8px,1vw,14px)}
+/* крупные планы узлов: активный шире и играет, остальные ждут */
+.vp{position:relative;flex:1 1 0;min-width:0;border-radius:14px;border:1px solid rgba(207,224,229,.14);background:rgba(6,22,29,.42);cursor:pointer;overflow:hidden;transition:flex-grow .8s var(--ease),border-color .4s var(--ease)}
+.vp.is-on{flex-grow:2.3;border-color:rgba(242,106,27,.65)}
+.vp-l{position:absolute;left:14px;top:11px;font:600 14px/1.2 var(--text);letter-spacing:.05em;text-transform:uppercase;color:#8FAAB3;white-space:nowrap;transition:color .3s var(--ease)}
+.vp.is-on .vp-l{color:#fff}
+.vp svg{position:absolute;left:8px;right:8px;top:38px;bottom:8px;width:calc(100% - 16px);height:calc(100% - 46px);overflow:visible;transition:opacity .5s var(--ease)}
+.vp:not(.is-on) svg{opacity:.5}
+.vps .ln{fill:none;stroke:#CFE0E5;stroke-width:2.4;stroke-linejoin:round;stroke-linecap:round;transition:stroke .5s var(--ease)}
+.vps .fillk{fill:#0C2832}
+.vps .ln.fillk{fill:#0C2832}
+.vps .dk{fill:#06161D}
+.vps .th{fill:none;stroke:#7FA3AE;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.vps .dep{fill:var(--ochre)}
+.vps .fade{transition:opacity .35s var(--ease)}
+.vps .or{fill:var(--orange)}
+.vps .ors{fill:none;stroke:var(--orange);stroke-width:4;stroke-linecap:round}
+.vps .glow{fill:rgba(242,106,27,.16)}
+.vps .bristle{stroke:var(--orange);stroke-width:3;stroke-linecap:round}
+.vps .hubk{fill:var(--ink2)}
+.vps .spray{fill:rgba(87,165,186,.35)}
+.vps .slab{fill:rgba(169,192,200,.14);stroke:rgba(169,192,200,.4);stroke-width:1.2}
+.vps .tray{fill:none;stroke:#7FA3AE;stroke-width:2}
+.vps .blade{fill:none;stroke:#CFE0E5;stroke-width:9;stroke-linecap:round;transition:stroke .5s var(--ease)}
+.vps .wall{stroke-width:1.4;opacity:.7}
+.vps .vd-end{fill:#06161D;transition:fill .8s var(--ease)}
+.vps.is-clean .vd-end{fill:rgba(87,165,186,.45)}
+.vps .vsh-cab{stroke:#CFE0E5;stroke-width:2}
+.vps .vh-f .vh-fr{transition:stroke .5s var(--ease)}
+.vps .vh-f.is-clean .vh-fr,.vps.is-clean .ln,.vps.is-clean .blade{stroke:var(--teal2)}
+.vps .vh-noz,.vps .vh-drips circle,.vps .vd-br{transition:opacity .3s var(--ease)}
+.vps .air{fill:none;stroke:var(--teal2);stroke-width:3;stroke-dasharray:6 18;stroke-linecap:round;opacity:0;animation:vsAir .9s linear infinite;transition:opacity .6s var(--ease)}
+.vps.is-clean .air{opacity:.95}
 @keyframes vsAir{to{stroke-dashoffset:-24}}
-.vs .vs-dep{fill:var(--ochre)}
-.vs [data-d]{transition:opacity .35s var(--ease)}
-.vs .vs-glow{fill:rgba(242,106,27,.22)}
-.vs .vs-br path{stroke:var(--orange);stroke-width:3;stroke-linecap:round}
-.vs .vs-hub2{fill:var(--orange)}
-.vs .vs-lbl{font:600 19px var(--text);fill:#8FAAB3;transition:fill .3s var(--ease)}
-.vs .vs-lbl.is-on{fill:#fff}
 /* карточки узлов */
 .vnt-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(14px,1.8vw,28px);margin-top:clamp(18px,2.4vw,32px)}
 .vc{display:flex;flex-direction:column;min-width:0}
@@ -249,11 +260,12 @@ h1{font-size:clamp(30px,min(4.05vw,6.5vh),72px)}
 .vc p{margin:8px 0 18px;color:var(--mute);font-size:16px}
 .vc .btn{margin-top:auto;align-self:flex-start;min-height:48px;padding:0 16px;font-size:15px;white-space:normal;text-align:left}
 @media (max-width:900px){
-  .vnt-board{aspect-ratio:16/10;border-radius:16px}
-  .vnt-scheme{inset:3% 0}
+  .vnt-board{aspect-ratio:5/4;border-radius:16px}
+  .vnt-scheme{inset:10px}
+  .vp:not(.is-on){display:none}
   .vnt-cards{gap:10px 6px}
   .vc{display:contents}
-  .vc-tab{grid-row:1;justify-content:flex-end;gap:8px;min-height:44px;min-width:0;font-size:13px;letter-spacing:0;text-transform:none;overflow-wrap:anywhere;hyphens:auto}
+  .vc-tab{grid-row:1;justify-content:flex-end;gap:8px;min-height:44px;min-width:0;font-size:12px;letter-spacing:-.01em;text-transform:none;overflow-wrap:anywhere;hyphens:auto}
   .vc-body{grid-row:2;grid-column:1/-1;margin-top:8px;visibility:hidden;opacity:0;transition:opacity var(--t2) var(--ease)}
   .vc.is-on .vc-body{visibility:visible;opacity:1}
   .vc .btn{margin-top:0}
@@ -583,5 +595,3 @@ html.lenis,html.lenis body{height:auto}.lenis:not(.lenis-autoToggle).lenis-stopp
 .dd .fg-wave{fill:var(--teal);opacity:0}
 .dd .fg-vent{fill:var(--teal);opacity:0}
 @media (min-width:861px) and (max-height:800px){.hero-txt{width:min(calc(100% - 2 * var(--pad)),700px)}.hero-txt .lead{max-width:600px}}
-.vs .vs-body{fill:rgba(207,224,229,.06)}
-.vs .vs-case{fill:rgba(15,46,59,.6)}
